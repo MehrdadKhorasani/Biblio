@@ -1,6 +1,8 @@
 const db = require("../config/db");
 const Order = require("../models/order.model");
 const OrderItem = require("../models/orderItem.model");
+const OrderStatusHistory = require("../models/orderStatusHistory.model");
+const { get } = require("../routes/order.route");
 
 const getAllOrders = async (req, res) => {
   try {
@@ -229,6 +231,7 @@ const updateOrderStatus = async (req, res) => {
   try {
     const orderId = req.params.id;
     const { status } = req.body;
+    const adminId = req.user.id;
 
     const allowedStatuses = ["paid", "shipped", "delivered"];
 
@@ -263,6 +266,13 @@ const updateOrderStatus = async (req, res) => {
         message: "Only shipped orders can be delivered",
       });
     }
+
+    await OrderStatusHistory.create({
+      orderId,
+      oldStatus: order.status,
+      newStatus: status,
+      changedBy: adminId,
+    });
 
     const updatedOrder = await Order.updateStatus(orderId, status);
 
@@ -299,6 +309,19 @@ const getAdminOrders = async (req, res) => {
   }
 };
 
+const getOrderStatusHistory = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+
+    const history = await OrderStatusHistory.findByOrderId(orderId);
+
+    res.status(200).json({ history });
+  } catch (error) {
+    console.error("Error fetching order status history:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 module.exports = {
   getAllOrders,
   createOrder,
@@ -308,4 +331,5 @@ module.exports = {
   getAllOrdersAdmin,
   updateOrderStatus,
   getAdminOrders,
+  getOrderStatusHistory,
 };

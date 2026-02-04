@@ -24,4 +24,11 @@ router.patch(
   orderController.updateOrderStatus,
 );
 
+router.get(
+  "/:id/history",
+  authenticate,
+  authorizeAdmin,
+  orderController.getOrderStatusHistory,
+);
+
 module.exports = router;
