@@ -1,0 +1,5 @@
+psql_hist.txt
+docs
+server/node_modules/
+server/.env
+client/client/node_modules/
