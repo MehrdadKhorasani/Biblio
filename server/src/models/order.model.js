@@ -97,6 +97,20 @@ const Order = {
     );
     return result.rows[0];
   },
+
+  async findByStatus(status) {
+    const result = await db.query(
+      `
+    SELECT *
+    FROM "Order"
+    WHERE status = $1
+    ORDER BY "createdAt" DESC
+    `,
+      [status],
+    );
+
+    return result.rows;
+  },
 };
 
 module.exports = Order;

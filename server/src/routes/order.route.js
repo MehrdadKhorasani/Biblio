@@ -9,10 +9,19 @@ router.get("/user", authenticate, orderController.getUserOrders);
 router.post("/", authenticate, orderController.createOrder);
 router.post("/:id/cancel", authenticate, orderController.cancelOrder);
 router.post("/:id/pay", authenticate, orderController.payOrder);
+
 router.get(
   "/admin",
   authenticate,
   authorizeAdmin,
-  orderController.getAllOrdersAdmin,
+  orderController.getAdminOrders,
 );
+
+router.patch(
+  "/:id/status",
+  authenticate,
+  authorizeAdmin,
+  orderController.updateOrderStatus,
+);
+
 module.exports = router;

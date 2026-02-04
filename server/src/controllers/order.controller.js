@@ -225,6 +225,80 @@ const getAllOrdersAdmin = async (req, res) => {
   }
 };
 
+const updateOrderStatus = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const { status } = req.body;
+
+    const allowedStatuses = ["paid", "shipped", "delivered"];
+
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        message: "Invalid order status",
+      });
+    }
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found",
+      });
+    }
+
+    if (order.status === "cancelled" || order.status === "delivered") {
+      return res.status(400).json({
+        message: "This order cannot be updated",
+      });
+    }
+
+    if (status === "shipped" && order.status !== "paid") {
+      return res.status(400).json({
+        message: "Only paid orders can be shipped",
+      });
+    }
+
+    if (status === "delivered" && order.status !== "shipped") {
+      return res.status(400).json({
+        message: "Only shipped orders can be delivered",
+      });
+    }
+
+    const updatedOrder = await Order.updateStatus(orderId, status);
+
+    res.status(200).json({
+      message: "Order status updated successfully",
+      order: updatedOrder,
+    });
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+const getAdminOrders = async (req, res) => {
+  try {
+    const { status } = req.query;
+
+    let orders;
+    if (status) {
+      orders = await Order.findByStatus(status);
+    } else {
+      orders = await Order.findAll();
+    }
+
+    for (const order of orders) {
+      const items = await OrderItem.findByOrderId(order.id);
+      order.items = items;
+    }
+
+    res.status(200).json({ orders });
+  } catch (error) {
+    console.error("Error fetching admin orders:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 module.exports = {
   getAllOrders,
   createOrder,
@@ -232,4 +306,6 @@ module.exports = {
   cancelOrder,
   payOrder,
   getAllOrdersAdmin,
+  updateOrderStatus,
+  getAdminOrders,
 };
