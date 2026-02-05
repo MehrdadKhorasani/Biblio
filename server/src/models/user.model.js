@@ -60,8 +60,9 @@ const User = {
         `;
     const result = await db.query(query, [id]);
     if (!result.rows.length) return null;
-    const row = result.rows[0];
-    return {
+    return result.rows[0];
+    //const row = result.rows[0];
+    /*return {
       id: row.id,
       firstName: row.firstName,
       lastName: row.lastName,
@@ -71,6 +72,7 @@ const User = {
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     };
+  */
   },
 
   async findAll() {
@@ -89,6 +91,64 @@ const User = {
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     }));
+  },
+
+  async findAllForAdmin() {
+    const query = `
+    SELECT
+      id,
+      "firstName",
+      "lastName",
+      email,
+      "roleId",
+      "isActive",
+      "createdAt",
+      "updatedAt"
+    FROM "User"
+    ORDER BY id ASC
+  `;
+
+    const result = await db.query(query);
+    return result.rows;
+  },
+
+  async updateActiveStatus(id, isActive) {
+    const result = await db.query(
+      `
+      UPDATE "User"
+      SET "isActive" = $1, "updatedAt" = CURRENT_TIMESTAMP
+      WHERE id = $2
+      RETURNING id, "firstName", "lastName", email, "roleId", "isActive", "updatedAt";
+    `,
+      [isActive, id],
+    );
+    return result.rows[0];
+  },
+
+  async updatedById(id, updates) {
+    const fields = [];
+    const values = [];
+    let index = 1;
+
+    for (const key in updates) {
+      fields.push(`"${key}" = $${index}`);
+      values.push(updates[key]);
+      index++;
+    }
+
+    fields.push(`"updatedAt" = CURRENT_TIMESTAMP`);
+
+    const query = `
+      UPDATE "User"
+      SET ${fields.join(", ")}
+      WHERE id = $${index}
+      RETURNING id, "firstName", "lastName", email, "roleId", "isActive", "createdAt", "updatedAt";
+    `;
+
+    values.push(id);
+
+    const result = await db.query(query, values);
+    return result.rows[0];
   },
 };
 
