@@ -4,9 +4,9 @@ const Book = {
   async create(book) {
     const query = `
             INSERT INTO "Book"
-            (title, author, translator, publisher, category,
+            (title, author, translator, publisher, 
             description, "ISBN", price, stock, "isAvailable",
-            "coverImage")
+            "coverImage", "categoryId")
             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
             RETURNING *;
         `;
@@ -16,13 +16,13 @@ const Book = {
       book.author,
       book.translator || null,
       book.publisher,
-      book.category,
       book.description || null,
       book.ISBN || null,
       book.price,
       book.stock,
-      book.isAvailable,
+      book.stock > 0,
       book.coverImage || null,
+      book.categoryId,
     ];
 
     const result = await db.query(query, values);
@@ -31,22 +31,69 @@ const Book = {
 
   async findAll() {
     const query = `
-            SELECT * FROM "Book"
-            ORDER BY "createdAt" DESC;
+        SELECT 
+            b.*,
+            c.name AS "categoryName"
+        FROM "Book" b
+        LEFT JOIN "Category" c ON b."categoryId" = c.id
+        ORDER BY b."createdAt" DESC;
         `;
 
     const result = await db.query(query);
-    return result.rows;
+    return result.rows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      author: row.author,
+      translator: row.translator,
+      publisher: row.publisher,
+      description: row.description,
+      ISBN: row.ISBN,
+      price: row.price,
+      stock: row.stock,
+      isAvailable: row.isAvailable,
+      coverImage: row.coverImage,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      category: {
+        id: row.categoryId,
+        name: row.categoryName,
+      },
+    }));
   },
 
   async findById(id) {
     const query = `
-            SELECT * FROM "Book"
-            WHERE id = $1;
+        SELECT 
+          b.*,
+          c.name AS "categoryName"
+        FROM "Book" b
+        LEFT JOIN "Category" c ON c.id = b."categoryId"
+        WHERE b.id = $1;
         `;
 
     const result = await db.query(query, [id]);
-    return result.rows[0];
+    if (!result.rows.length) return null;
+
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      title: row.title,
+      author: row.author,
+      translator: row.translator,
+      publisher: row.publisher,
+      description: row.description,
+      ISBN: row.ISBN,
+      price: row.price,
+      stock: row.stock,
+      isAvailable: row.isAvailable,
+      coverImage: row.coverImage,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      category: {
+        id: row.categoryId,
+        name: row.categoryName,
+      },
+    };
   },
 
   async updateStock(id, stock) {
@@ -97,6 +144,41 @@ const Book = {
 
     const result = await db.query(query, values);
     return result.rows;
+  },
+
+  async updateById(id, updates) {
+    const fields = [];
+    const values = [];
+    let index = 1;
+
+    for (const key in updates) {
+      fields.push(`"${key}" = $${index++}`);
+      values.push(updates[key]);
+    }
+    const query = `
+            UPDATE "Book"
+            SET ${fields.join(", ")},
+                "updatedAt" = CURRENT_TIMESTAMP
+            WHERE id = $${index}
+            RETURNING *;
+        `;
+    values.push(id);
+
+    const result = await db.query(query, values);
+    return result.rows[0];
+  },
+
+  async updateAvailability(id, isAvailable) {
+    const query = `
+            UPDATE "Book"
+            SET "isAvailable" = $1,
+                "updatedAt" = CURRENT_TIMESTAMP
+            WHERE id = $2
+            RETURNING *;
+        `;
+
+    const result = await db.query(query, [isAvailable, id]);
+    return result.rows[0];
   },
 };
 

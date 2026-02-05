@@ -38,7 +38,7 @@ router.patch(
   userController.changeUserRole,
 );
 
-router.pathch(
+router.patch(
   "/manager/users/:id/active",
   authenticate,
   authorizeManager,
