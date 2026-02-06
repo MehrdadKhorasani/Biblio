@@ -29,13 +29,14 @@ const Book = {
     return result.rows[0];
   },
 
-  async findAll() {
+  async findAll({ includeDeleted = false } = {}) {
     const query = `
         SELECT 
             b.*,
             c.name AS "categoryName"
         FROM "Book" b
         LEFT JOIN "Category" c ON b."categoryId" = c.id
+        ${includeDeleted ? "" : 'WHERE b."isDeleted" = false'}
         ORDER BY b."createdAt" DESC;
         `;
 
@@ -54,6 +55,8 @@ const Book = {
       coverImage: row.coverImage,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
+      isDeleted: row.isDeleted,
+      deletedAt: row.deletedAt,
       category: {
         id: row.categoryId,
         name: row.categoryName,
@@ -61,7 +64,7 @@ const Book = {
     }));
   },
 
-  async findById(id) {
+  async findById(id, { includeDeleted = false } = {}) {
     const query = `
         SELECT 
           b.*,
@@ -69,6 +72,7 @@ const Book = {
         FROM "Book" b
         LEFT JOIN "Category" c ON c.id = b."categoryId"
         WHERE b.id = $1;
+        ${includeDeleted ? "" : 'AND b."isDeleted" = false'};
         `;
 
     const result = await db.query(query, [id]);
@@ -89,6 +93,8 @@ const Book = {
       coverImage: row.coverImage,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
+      isDeleted: row.isDeleted,
+      deletedAt: row.deletedAt,
       category: {
         id: row.categoryId,
         name: row.categoryName,
@@ -225,7 +231,11 @@ const Book = {
         ? filters.order
         : "desc";
 
-    const query = `
+    const limit = parseInt(filters.limit) || 10;
+    const page = parseInt(filters.page) || 1;
+    const offset = (page - 1) * limit;
+
+    const dataQuery = `
         SELECT 
             b.*,
             c.id AS "categoryId",
@@ -234,28 +244,100 @@ const Book = {
         JOIN "Category" c ON b."categoryId" = c.id
         ${whereClause}
         ORDER BY b."${sortField}" ${sortOrder}
+        LIMIT $${index++} OFFSET $${index++};
         `;
-    const result = await db.query(query, values);
 
-    return result.rows.map((row) => ({
-      id: row.id,
-      title: row.title,
-      author: row.author,
-      translator: row.translator,
-      publisher: row.publisher,
-      description: row.description,
-      ISBN: row.ISBN,
-      price: row.price,
-      stock: row.stock,
-      isAvailable: row.isAvailable,
-      coverImage: row.coverImage,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-      category: {
-        id: row.categoryId,
-        name: row.categoryName,
+    const countQuery = `
+      SELECT COUNT(*)
+      FROM "Book" b
+      ${whereClause};
+    `;
+
+    const dataResult = await db.query(dataQuery, [...values, limit, offset]);
+    const countResult = await db.query(countQuery, values);
+
+    return {
+      books: dataResult.rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        author: row.author,
+        translator: row.translator,
+        publisher: row.publisher,
+        desctiption: row.description,
+        ISBN: row.ISBN,
+        price: row.price,
+        stock: row.stock,
+        isAvailable: row.isAvailable,
+        coverImage: row.coverImage,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        category: {
+          id: row.categoryId,
+          name: row.categoryName,
+        },
+      })),
+      pagination: {
+        total: parseInt(countResult.rows[0].count),
+        page,
+        limit,
+        totalPages: Math.ceil(countResult.rows[0].count / limit),
       },
-    }));
+    };
+  },
+
+  async softDelete(id) {
+    const query = `
+      UPDATE "Book"
+      SET "isDeleted" = true,
+          "deletedAt" = CURRENT_TIMESTAMP,
+          "updatedAt" = CURRENT_TIMESTAMP
+      WHERE id = $1 AND "isDeleted" = false
+      RETURNING *;
+    `;
+    const result = await db.query(query, [id]);
+    return result.rows[0];
+  },
+
+  async restore(id) {
+    const query = `
+    UPDATE "Book"
+    SET "isDeleted" = false,
+        "deletedAt" = NULL,
+        "updatedAt" = CURRENT_TIMESTAMP
+    WHERE id = $1 AND "isDeleted" = true
+    RETURNING *;
+  `;
+    const result = await db.query(query, [id]);
+    return result.rows[0];
+  },
+
+  async softDelete(id) {
+    const query = `
+      UPDATE "Book"
+      SET
+        "isDeleted" = true,
+        "deletedAt" = CURRENT_TIMESTAMP,
+        "updatedAt" = CURRENT_TIMESTAMP
+      WHERE id = $1 AND "isDeleted" = false
+      RETURNING *;
+    `;
+    const result = await db.query(query, [id]);
+    return result.rows[0];
+  },
+
+  async restore(id) {
+    const query = `
+      UPDATE "Book"
+      SET 
+        "isDeleted" = false,
+        "deletedAt" = null,
+        "updatedAt" = CURRENT_TIMESTAMP
+      WHERE id = $1 AND "isDeleted" = true
+      RETURNING *;
+    `;
+
+    const result = await db.query(query, [id]);
+    return result.rows[0];
   },
 };
 

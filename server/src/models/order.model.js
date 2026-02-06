@@ -85,19 +85,6 @@ const Order = {
     );
   },
 
-  async updateStatus(id, status) {
-    const result = await db.query(
-      `
-      UPDATE "Order" SET
-      status = $1, "updatedAt" = CURRENT_TIMESTAMP
-      WHERE id = $2
-      RETURNING *;
-    `,
-      [status, id],
-    );
-    return result.rows[0];
-  },
-
   async findByStatus(status) {
     const result = await db.query(
       `

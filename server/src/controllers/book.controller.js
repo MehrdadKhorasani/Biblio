@@ -11,9 +11,7 @@ const ROLES = {
 
 const getAllBooks = async (req, res) => {
   try {
-    const { categoryId, search, author, minPrice, maxPrice, sort, order } =
-      req.query;
-    let books = await Book.findAllWithFilters({
+    const {
       categoryId,
       search,
       author,
@@ -21,13 +19,38 @@ const getAllBooks = async (req, res) => {
       maxPrice,
       sort,
       order,
+      page,
+      limit,
+      includeDeleted,
+    } = req.query;
+
+    const canSeeDeleted =
+      req.user &&
+      (req.user.roleId === ROLES.ADMIN || req.user.roleId == ROLES.MANAGER);
+
+    let result = await Book.findAllWithFilters({
+      categoryId,
+      search,
+      author,
+      minPrice,
+      maxPrice,
+      sort,
+      order,
+      page,
+      limit,
+      includeDeleted: canSeeDeleted && includeDeleted === "true",
     });
+
+    let books = result.books;
 
     if (req.user && req.user.roleId === ROLES.USER) {
       books = books.filter((b) => b.isAvailable === true && b.stock > 0);
     }
 
-    res.status(200).json({ books });
+    res.status(200).json({
+      books,
+      pagination: result.pagination,
+    });
   } catch (error) {
     console.error("Error fetching books:", error);
     res.status(500).json({ message: "Server Error" });
@@ -37,7 +60,7 @@ const getAllBooks = async (req, res) => {
 const getBookById = async (req, res) => {
   try {
     const bookId = parseInt(req.params.id);
-    const book = await Book.findById(bookId);
+    const book = await Book.findById(bookId, { includeDeleted });
 
     if (!book) {
       return res.status(404).json({ message: "Book not found" });
@@ -162,7 +185,7 @@ const toggleBookAvailability = async (req, res) => {
   }
 };
 
-const updateBookStock = async () => {
+const updateBookStock = async (req, res) => {
   try {
     const bookId = parseInt(req.params.id);
     const { amount, note } = req.body;
@@ -186,7 +209,7 @@ const updateBookStock = async () => {
 
     const updatedBook = await Book.updateStock(bookId, newStock);
 
-    await BOOKStockLog.create({
+    await BookStockLog.create({
       bookId,
       actorId: req.user.id,
       action: amount > 0 ? "INCREASE_STOCK" : "DECREASE_STOCK",
@@ -229,6 +252,56 @@ const getBookStockHistory = async (req, res) => {
   }
 };
 
+const softDeleteBook = async (req, res) => {
+  try {
+    const bookId = parseInt(req.params.id);
+
+    const book = await Book.findById(bookId, { includeDeleted: true });
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    if (book.isDeleted) {
+      return res.status(400).json({ message: "Book already deleted" });
+    }
+
+    const deletedBook = await Book.softDelete(bookId);
+
+    res.status(200).json({
+      message: "Book deleted successfully",
+      book: deletedBook,
+    });
+  } catch (error) {
+    console.error("Error soft deleting book:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+const restoreBook = async (req, res) => {
+  try {
+    const bookId = parseInt(req.params.id);
+
+    const book = await Book.findById(bookId, { includeDeleted: true });
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    if (!book.isDeleted) {
+      return res.status(400).json({ message: "Book is not deleted" });
+    }
+
+    const restoredBook = await Book.restore(bookId);
+
+    res.status(200).json({
+      message: "Book restored successfully",
+      book: restoredBook,
+    });
+  } catch (error) {
+    console.error("Error restoring book:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 module.exports = {
   getAllBooks,
   getBookById,
@@ -237,4 +310,6 @@ module.exports = {
   toggleBookAvailability,
   getBookStockHistory,
   updateBookStock,
+  softDeleteBook,
+  restoreBook,
 };

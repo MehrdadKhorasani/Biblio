@@ -2,7 +2,6 @@ const db = require("../config/db");
 const Order = require("../models/order.model");
 const OrderItem = require("../models/orderItem.model");
 const OrderStatusHistory = require("../models/orderStatusHistory.model");
-const { get } = require("../routes/order.route");
 
 const getAllOrders = async (req, res) => {
   try {
@@ -162,7 +161,7 @@ const cancelOrder = async (req, res) => {
 
     await client.query(
       `UPDATE "Order" 
-          SET status = 'Cancelled',
+          SET status = 'cancelled',
             "updatedAt" = CURRENT_TIMESTAMP
           WHERE id = $1`,
       [orderId],

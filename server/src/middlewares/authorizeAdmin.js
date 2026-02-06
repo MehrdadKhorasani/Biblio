@@ -4,8 +4,8 @@ const authorizeAdmin = (req, res, next) => {
     ADMIN: 2,
     Manager: 3,
   };
-  if (req.user.roleId !== Roles.ADMIN) {
-    return res.status(403).json({ message: "Admin access only" });
+  if (![Roles.ADMIN, Roles.Manager].includes(req.user.roleId)) {
+    return res.status(403).json({ message: "Access denied" });
   }
   next();
 };
