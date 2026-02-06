@@ -180,6 +180,83 @@ const Book = {
     const result = await db.query(query, [isAvailable, id]);
     return result.rows[0];
   },
+
+  async findAllWithFilters(filters = {}) {
+    let conditions = [];
+    let values = [];
+    let index = 1;
+
+    if (filters.categoryId) {
+      conditions.push(`b."categoryId" = $${index++}`);
+      values.push(filters.categoryId);
+    }
+
+    if (filters.search) {
+      conditions.push(`b.title ILIKE $${index++}`);
+      values.push(`%${filters.search}%`);
+    }
+
+    if (filters.author) {
+      conditions.push(`b.author ILIKE $${index++}`);
+      values.push(`%${filters.author}%`);
+    }
+
+    if (filters.minPrice) {
+      conditions.push(`b.price >= $${index++}`);
+      values.push(filters.minPrice);
+    }
+
+    if (filters.maxPrice) {
+      conditions.push(`b.price <= $${index++}`);
+      values.push(filters.maxPrice);
+    }
+
+    const whereClause =
+      conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+
+    const allowedSortFields = ["price", "createdAt"];
+
+    const sortField = allowedSortFields.includes(filters.sortBy)
+      ? filters.sort
+      : "createdAt";
+
+    const sortOrder =
+      filters.order === "asc" || filters.order === "desc"
+        ? filters.order
+        : "desc";
+
+    const query = `
+        SELECT 
+            b.*,
+            c.id AS "categoryId",
+            c.name AS "categoryName"
+        FROM "Book" b
+        JOIN "Category" c ON b."categoryId" = c.id
+        ${whereClause}
+        ORDER BY b."${sortField}" ${sortOrder}
+        `;
+    const result = await db.query(query, values);
+
+    return result.rows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      author: row.author,
+      translator: row.translator,
+      publisher: row.publisher,
+      description: row.description,
+      ISBN: row.ISBN,
+      price: row.price,
+      stock: row.stock,
+      isAvailable: row.isAvailable,
+      coverImage: row.coverImage,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      category: {
+        id: row.categoryId,
+        name: row.categoryName,
+      },
+    }));
+  },
 };
 
 module.exports = Book;

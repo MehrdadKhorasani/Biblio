@@ -11,7 +11,17 @@ const ROLES = {
 
 const getAllBooks = async (req, res) => {
   try {
-    let books = await Book.findAll();
+    const { categoryId, search, author, minPrice, maxPrice, sort, order } =
+      req.query;
+    let books = await Book.findAllWithFilters({
+      categoryId,
+      search,
+      author,
+      minPrice,
+      maxPrice,
+      sort,
+      order,
+    });
 
     if (req.user && req.user.roleId === ROLES.USER) {
       books = books.filter((b) => b.isAvailable === true && b.stock > 0);
