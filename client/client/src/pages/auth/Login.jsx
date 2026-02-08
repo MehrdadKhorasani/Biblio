@@ -1,47 +1,44 @@
 import { useState } from "react";
-import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
-  const { login } = useAuth();
-  const navigate = useNavigate();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const submitHandler = async (e) => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
       await login(email, password);
-      navigate("/dashboard"); // صفحه موقت
+      navigate("/dashboard");
     } catch (err) {
       setError("ایمیل یا رمز عبور اشتباه است", err);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 rtl">
+    <div
+      className="min-h-screen flex items-center justify-center bg-gray-100"
+      dir="rtl"
+    >
       <form
-        onSubmit={submitHandler}
-        className="bg-white p-6 rounded-lg w-96 shadow"
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded shadow w-full max-w-md text-right"
       >
-        <h1 className="text-xl font-bold mb-4 text-center">
-          ورود به حساب کاربری
-        </h1>
+        <h1 className="text-2xl font-bold mb-6">ورود</h1>
 
-        {error && (
-          <div className="bg-red-100 text-red-700 p-2 mb-3 rounded">
-            {error}
-          </div>
-        )}
+        {error && <p className="text-red-500 mb-4">{error}</p>}
 
         <input
           type="email"
           placeholder="ایمیل"
-          className="w-full border p-2 mb-3 rounded text-right"
+          className="w-full border p-2 mb-4 rounded"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -49,12 +46,15 @@ const Login = () => {
         <input
           type="password"
           placeholder="رمز عبور"
-          className="w-full border p-2 mb-4 rounded text-right"
+          className="w-full border p-2 mb-6 rounded"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+        >
           ورود
         </button>
       </form>

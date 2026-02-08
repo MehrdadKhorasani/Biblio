@@ -1,16 +1,33 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./pages/auth/Login";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import PrivateRoute from "./routes/PrivateRoute";
 
-const Dashboard = () => <div className="p-10 text-center">وارد شدید</div>;
+import Login from "./pages/auth/Login";
+import Dashboard from "./pages/dashboard/Dashboard";
+import Unauthorized from "./pages/auth/Unauthorized";
+
+const ROLES = {
+  USER: 1,
+  ADMIN: 2,
+  MANAGER: 3,
+};
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {/* Public Routes */}
           <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+
+          {/* Private Routes */}
+          <Route element={<PrivateRoute />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Route>
+
+          {/* Default */}
+          <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -1,9 +1,10 @@
+/* eslint-disable react-refresh/only-export-components */
+
 import { createContext, useState, useContext } from "react";
 import axios from "axios";
 
 const AuthContext = createContext(null);
 
-// گرفتن state اولیه از localStorage
 const getInitialAuth = () => {
   const token = localStorage.getItem("token");
   const user = localStorage.getItem("user");
