@@ -2,10 +2,13 @@ import { Search, ShoppingCart, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
+import { toPersianNumber } from "../../utils/toPersianNumbers";
 
 const Header = () => {
   const { user } = useAuth();
   const { cartItems } = useCart();
+
+  const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <header className="w-full bg-white shadow-sm" dir="rtl">
@@ -28,18 +31,17 @@ const Header = () => {
         {/* چپ: اکشن‌ها */}
         <div className="flex items-center gap-4">
           <Link to="/cart">
-            <button className="relative">
-              <ShoppingCart className="text-gray-700" />
-              <span
-                className={
-                  cartItems.length > 0
-                    ? "bg-red-500 text-white text-xs px-2 py-1 rounded-full absolute top-0 right-0"
-                    : "hidden"
-                }
-              >
-                {cartItems.length}
-              </span>
-            </button>
+            <div className="relative">
+              <ShoppingCart className="text-gray-700" size={22} />
+              {totalQuantity > 0 && (
+                <span
+                  className="absolute -top-2 -left-2 bg-red-500 text-white 
+              text-[10px] min-w-[18px] h-5 px-1 flex items-center justify-center rounded-full"
+                >
+                  {toPersianNumber(totalQuantity)}
+                </span>
+              )}
+            </div>
           </Link>
           {user ? (
             <Link

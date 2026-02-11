@@ -4,7 +4,13 @@ import { useCart } from "../context/CartContext";
 import { toPersianNumber } from "../utils/toPersianNumbers";
 
 const Cart = () => {
-  const { cartItems, removeFromCart, clearCart } = useCart();
+  const {
+    cartItems,
+    removeFromCart,
+    clearCart,
+    decreaseQuantity,
+    increaseQuantity,
+  } = useCart();
 
   const totalPrice = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
@@ -37,11 +43,28 @@ const Cart = () => {
 
                     <div>
                       <h3 className="font-bold">{item.title}</h3>
-                      <p className="text-gray-600 text-sm">
-                        تعداد: {toPersianNumber(item.quantity)}
-                      </p>
+                      <div className="flex items-center gap-2 mt-2 bg-gray-100 rounded px-2 py-1 w-fit">
+                        <button
+                          onClick={() => decreaseQuantity(item.id)}
+                          className="text-lg font-bold px-2"
+                        >
+                          −
+                        </button>
+
+                        <span className="font-bold text-sm min-w-[20px] text-center">
+                          {toPersianNumber(item.quantity)}
+                        </span>
+
+                        <button
+                          onClick={() => increaseQuantity(item.id)}
+                          className="text-lg font-bold px-2"
+                        >
+                          +
+                        </button>
+                      </div>
+
                       <p className="text-blue-600 font-bold">
-                        {toPersianNumber(item.price)} تومان
+                        {toPersianNumber(item.price * item.quantity)} تومان
                       </p>
                     </div>
                   </div>
