@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { books } from "../books";
+import { categories } from "../categories";
 import { useCart } from "../context/CartContext";
 import { toPersianNumber } from "../utils/toPersianNumbers";
 import Header from "../components/layout/Header";
@@ -14,17 +15,22 @@ const BookDetails = () => {
     useCart();
 
   if (!book) {
-    return <div>کتاب پیدا نشد</div>;
+    return <div className="text-center py-20">کتاب پیدا نشد</div>;
   }
 
+  // گرفتن نام دسته‌بندی از categoryId
+  const category = categories.find((c) => c.id === book.categoryId);
+
   const relatedBooks = books
-    .filter((b) => b.category === book.category && b.id !== book.id)
+    .filter((b) => b.categoryId === book.categoryId && b.id !== book.id)
     .slice(0, 4);
 
   const quantity = getItemQuantity(book.id);
+
   return (
     <div dir="rtl">
       <Header />
+
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="grid md:grid-cols-2 gap-10 bg-white p-6 rounded-lg shadow">
           {/* ستون تصویر */}
@@ -43,8 +49,9 @@ const BookDetails = () => {
             <p className="text-gray-600 mb-2">نویسنده: {book.author}</p>
 
             <p className="text-sm text-gray-500 mb-4">
-              دسته‌بندی: {book.category}
+              دسته‌بندی: {category ? category.title : "نامشخص"}
             </p>
+
             <div className="space-y-2 text-sm text-gray-700 mb-6">
               {book.translator && (
                 <p>
@@ -70,14 +77,23 @@ const BookDetails = () => {
               </p>
             </div>
 
+            {/* قیمت */}
             <div className="mb-6">
               <span className="text-2xl font-bold text-indigo-600">
                 {toPersianNumber(book.price)} تومان
               </span>
             </div>
 
+            {/* کنترل سبد خرید */}
             <div className="mt-4">
-              {quantity === 0 ? (
+              {!book.inStock ? (
+                <button
+                  disabled
+                  className="bg-gray-300 text-gray-600 px-6 py-3 rounded cursor-not-allowed"
+                >
+                  ناموجود
+                </button>
+              ) : quantity === 0 ? (
                 <button
                   onClick={() => addToCart(book)}
                   className="bg-indigo-600 text-white px-6 py-3 rounded hover:bg-indigo-700 transition"
@@ -106,10 +122,10 @@ const BookDetails = () => {
                 </div>
               )}
             </div>
-
-            {/* اینجا بعداً قیمت و کنترل سبد رو میذاریم */}
           </div>
         </div>
+
+        {/* توضیحات */}
         <div className="mt-12 bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-bold mb-4">درباره کتاب</h2>
 
@@ -117,34 +133,36 @@ const BookDetails = () => {
             {book.description}
           </p>
         </div>
-      </div>
-      {relatedBooks.length > 0 && (
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold mb-6">کتاب‌های مرتبط</h2>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {relatedBooks.map((related) => (
-              <Link key={related.id} to={`/book/${related.id}`}>
-                <div className="bg-white p-3 rounded shadow hover:shadow-lg transition text-right">
-                  <img
-                    src={related.image}
-                    alt={related.title}
-                    className="h-40 w-full object-cover rounded mb-3"
-                  />
+        {/* کتاب‌های مرتبط */}
+        {relatedBooks.length > 0 && (
+          <div className="mt-16">
+            <h2 className="text-2xl font-bold mb-6">کتاب‌های مرتبط</h2>
 
-                  <h3 className="text-sm font-bold line-clamp-2">
-                    {related.title}
-                  </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {relatedBooks.map((related) => (
+                <Link key={related.id} to={`/book/${related.id}`}>
+                  <div className="bg-white p-3 rounded shadow hover:shadow-lg transition text-right">
+                    <img
+                      src={related.image}
+                      alt={related.title}
+                      className="h-40 w-full object-cover rounded mb-3"
+                    />
 
-                  <p className="text-indigo-600 font-medium mt-2 text-sm">
-                    {toPersianNumber(related.price)} تومان
-                  </p>
-                </div>
-              </Link>
-            ))}
+                    <h3 className="text-sm font-bold line-clamp-2">
+                      {related.title}
+                    </h3>
+
+                    <p className="text-indigo-600 font-medium mt-2 text-sm">
+                      {toPersianNumber(related.price)} تومان
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <Footer />
     </div>
