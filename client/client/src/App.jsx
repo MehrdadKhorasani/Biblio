@@ -8,6 +8,7 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import Unauthorized from "./pages/auth/Unauthorized";
 import Home from "./pages/home/Home";
 import BookDetail from "./pages/BookDetails";
+import Cart from "./pages/Cart";
 
 const ROLES = {
   USER: 1,
@@ -26,12 +27,12 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/book/:id" element={<BookDetail />} />
-
+            <Route path="/cart" element={<Cart />} />
+            :q
             {/* Private Routes */}
             <Route element={<PrivateRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
             </Route>
-
             {/* Default */}
             <Route path="*" element={<Navigate to="/dashboard" />} />
           </Routes>

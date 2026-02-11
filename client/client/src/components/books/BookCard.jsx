@@ -1,7 +1,12 @@
 import { toPersianNumber } from "../../utils/toPersianNumbers";
+import { useCart } from "../../context/CartContext";
 import { Link } from "react-router-dom";
 
 const BookCard = ({ book }) => {
+  const { addToCart, increaseQuantity, decreaseQuantity, getItemQuantity } =
+    useCart();
+  const quantity = getItemQuantity(book.id);
+
   return (
     <Link to={`/book/${book.id}`}>
       <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
@@ -20,12 +25,45 @@ const BookCard = ({ book }) => {
               {toPersianNumber(book.price.toLocaleString())} تومان
             </span>
 
-            <button
-              className="bg-blue-500 text-white px-3 py-1 rounded
-                       hover:bg-blue-600 transition text-sm"
-            >
-              افزودن به سبد
-            </button>
+            <div className="mt-3">
+              {quantity === 0 ? (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    addToCart(book);
+                  }}
+                  className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+                >
+                  افزودن به سبد
+                </button>
+              ) : (
+                <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-2 py-1">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      decreaseQuantity(book.id);
+                    }}
+                    className="w-8 h-8 flex items-center justify-center bg-white border rounded-md hover:bg-red-100 transition"
+                  >
+                    −
+                  </button>
+
+                  <span className="w-6 text-center font-bold text-blue-700">
+                    {toPersianNumber(quantity)}
+                  </span>
+
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      increaseQuantity(book.id);
+                    }}
+                    className="w-8 h-8 flex items-center justify-center bg-white border rounded-md hover:bg-green-100 transition"
+                  >
+                    +
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

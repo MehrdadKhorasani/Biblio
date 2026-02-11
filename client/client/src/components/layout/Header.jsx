@@ -27,19 +27,20 @@ const Header = () => {
 
         {/* چپ: اکشن‌ها */}
         <div className="flex items-center gap-4">
-          <button className="relative">
-            <ShoppingCart className="text-gray-700" />
-            <span
-              className={
-                cartItems.length > 0
-                  ? "bg-red-500 text-white text-xs px-2 py-1 rounded-full absolute top-0 right-0"
-                  : "hidden"
-              }
-            >
-              {cartItems.length}
-            </span>
-          </button>
-
+          <Link to="/cart">
+            <button className="relative">
+              <ShoppingCart className="text-gray-700" />
+              <span
+                className={
+                  cartItems.length > 0
+                    ? "bg-red-500 text-white text-xs px-2 py-1 rounded-full absolute top-0 right-0"
+                    : "hidden"
+                }
+              >
+                {cartItems.length}
+              </span>
+            </button>
+          </Link>
           {user ? (
             <Link
               to="/dashboard"
