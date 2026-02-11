@@ -1,9 +1,11 @@
 import { Search, ShoppingCart, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useCart } from "../../context/CartContext";
 
 const Header = () => {
   const { user } = useAuth();
+  const { cartItems } = useCart();
 
   return (
     <header className="w-full bg-white shadow-sm" dir="rtl">
@@ -27,7 +29,15 @@ const Header = () => {
         <div className="flex items-center gap-4">
           <button className="relative">
             <ShoppingCart className="text-gray-700" />
-            {/* badge بعداً */}
+            <span
+              className={
+                cartItems.length > 0
+                  ? "bg-red-500 text-white text-xs px-2 py-1 rounded-full absolute top-0 right-0"
+                  : "hidden"
+              }
+            >
+              {cartItems.length}
+            </span>
           </button>
 
           {user ? (
