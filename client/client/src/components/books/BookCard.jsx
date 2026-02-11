@@ -1,3 +1,4 @@
+import { toPersianNumber } from "../../utils/toPersianNumbers";
 const BookCard = ({ book }) => {
   return (
     <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
@@ -13,7 +14,7 @@ const BookCard = ({ book }) => {
 
         <div className="flex items-center justify-between mt-4">
           <span className="font-semibold text-blue-600">
-            {book.price.toLocaleString()} تومان
+            {toPersianNumber(book.price.toLocaleString())} تومان
           </span>
 
           <button
