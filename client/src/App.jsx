@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import PrivateRoute from "./routes/PrivateRoute";
+import Checkout from "./pages/Checkout";
+import OrderSuccess from "./pages/OrderSuccess";
 
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
@@ -28,7 +30,8 @@ function App() {
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="/book/:id" element={<BookDetail />} />
             <Route path="/cart" element={<Cart />} />
-            :q
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order-success" element={<OrderSuccess />} />
             {/* Private Routes */}
             <Route element={<PrivateRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />

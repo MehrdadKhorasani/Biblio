@@ -2,6 +2,7 @@ import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import { useCart } from "../context/CartContext";
 import { toPersianNumber } from "../utils/toPersianNumbers";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const {
@@ -16,6 +17,7 @@ const Cart = () => {
     (total, item) => total + item.price * item.quantity,
     0,
   );
+  const navigate = useNavigate();
 
   return (
     <div dir="rtl">
@@ -85,7 +87,10 @@ const Cart = () => {
                 <span>{toPersianNumber(totalPrice)} تومان</span>
               </div>
 
-              <button className="w-full bg-green-500 text-white py-3 rounded hover:bg-green-600">
+              <button
+                onClick={() => navigate("/checkout")}
+                className="w-full bg-green-500 text-white py-3 rounded hover:bg-green-600"
+              >
                 ادامه فرآیند خرید
               </button>
 

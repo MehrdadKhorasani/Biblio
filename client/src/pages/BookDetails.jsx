@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
-import { books } from "../books";
-import { categories } from "../categories";
+import { books } from "../mock/books";
+import { categories } from "../mock/categories";
 import { useCart } from "../context/CartContext";
 import { toPersianNumber } from "../utils/toPersianNumbers";
 import Header from "../components/layout/Header";

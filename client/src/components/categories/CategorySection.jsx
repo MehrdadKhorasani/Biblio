@@ -1,4 +1,4 @@
-import { categories } from "../../categories";
+import { categories } from "../../mock/categories";
 
 const CategorySection = ({ selectedCategory, setSelectedCategory }) => {
   return (

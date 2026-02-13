@@ -5,7 +5,7 @@ import Hero from "../../components/home/Hero";
 import Footer from "../../components/layout/Footer";
 import CategorySection from "../../components/categories/CategorySection";
 import BookList from "../../components/books/BookList";
-import { books } from "../../books";
+import { books } from "../../mock/books";
 
 import { toPersianNumber } from "../../utils/toPersianNumbers";
 
