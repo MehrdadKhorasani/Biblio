@@ -1,15 +1,27 @@
 const db = require("../config/db");
 
 const Order = {
-  async create({ userId, totalPrice, note }) {
+  async create(
+    { userId, totalPrice, note, phone, address, city, postalCode },
+    client,
+  ) {
     const query = `
             INSERT INTO "Order"
-            ("userId", "totalPrice", note)
-            VALUES ($1,$2,$3)
+            ("userId", "totalPrice", note, phone, address, city, "postalCode")
+            VALUES ($1,$2,$3, $4, $5, $6, $7)
             RETURNING *;
         `;
 
-    const values = [userId, totalPrice, note || null];
+    const values = [
+      userId,
+      totalPrice,
+      note || null,
+      phone,
+      address,
+      city,
+      postalCode,
+    ];
+    const executor = client || db;
     const result = await db.query(query, values);
     return result.rows[0];
   },

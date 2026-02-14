@@ -18,7 +18,7 @@ const createOrder = async (req, res) => {
 
   try {
     const userId = req.user.id;
-    const { items, note } = req.body;
+    const { items, note, phone, address, city, postalCode } = req.body;
 
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ message: "Items are required" });
@@ -31,7 +31,7 @@ const createOrder = async (req, res) => {
 
     for (const item of items) {
       const bookResult = await client.query(
-        `SELECT price FROM "Book" WHERE id = $1`,
+        `SELECT price, stock FROM "Book" WHERE id = $1`,
         [item.bookId],
       );
 
@@ -59,6 +59,10 @@ const createOrder = async (req, res) => {
         userId,
         totalPrice,
         note: note || null,
+        phone,
+        address,
+        city,
+        postalCode,
       },
       client,
     );
@@ -321,6 +325,31 @@ const getOrderStatusHistory = async (req, res) => {
   }
 };
 
+const getOrderById = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const userId = req.user.id;
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.userId !== userId) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const items = await OrderItem.findByOrderId(orderId);
+    order.items = items;
+
+    res.status(200).json({ order });
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 module.exports = {
   getAllOrders,
   createOrder,
@@ -331,4 +360,5 @@ module.exports = {
   updateOrderStatus,
   getAdminOrders,
   getOrderStatusHistory,
+  getOrderById,
 };

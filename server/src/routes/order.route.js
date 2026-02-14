@@ -5,7 +5,8 @@ const authenticate = require("../middlewares/auth.middleware");
 const authorizeAdmin = require("../middlewares/authorizeAdmin");
 
 //router.get("/", authenticate, orderController.getAllOrders);
-router.get("/user", authenticate, orderController.getUserOrders);
+router.get("/my", authenticate, orderController.getUserOrders);
+router.get("/:id", authenticate, orderController.getOrderById);
 router.post("/", authenticate, orderController.createOrder);
 router.post("/:id/cancel", authenticate, orderController.cancelOrder);
 router.post("/:id/pay", authenticate, orderController.payOrder);
