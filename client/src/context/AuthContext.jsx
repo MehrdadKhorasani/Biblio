@@ -7,13 +7,24 @@ const AuthContext = createContext(null);
 
 const getInitialAuth = () => {
   const token = localStorage.getItem("token");
-  const user = localStorage.getItem("user");
+  const userString = localStorage.getItem("user");
+
+  let user = null;
+
+  try {
+    if (userString) {
+      user = JSON.parse(userString);
+    }
+  } catch (err) {
+    console.error("Invalid user in localStorage", err);
+    localStorage.removeItem("user");
+  }
 
   if (token && user) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     return {
       token,
-      user: JSON.parse(user),
+      user,
     };
   }
 
@@ -56,8 +67,15 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateUser = (updatedUser) => {
+    setUser(updatedUser);
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, token, login, logout, updateUser, setUser }}
+    >
       {children}
     </AuthContext.Provider>
   );

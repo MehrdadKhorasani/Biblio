@@ -31,42 +31,37 @@ const getMyProfile = async (req, res) => {
 const updateMyProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName } = req.body;
     const updates = {};
 
     if (firstName) updates.firstName = firstName;
     if (lastName) updates.lastName = lastName;
-    if (email) updates.email = email;
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      updates.passwordHash = hashedPassword;
-    }
 
     const updatedUser = await User.updatedById(userId, updates);
 
     delete updatedUser.passwordHash;
 
-    res.status(200).json({
-      message: "Profile updated successfully",
-      user: updatedUser,
-    });
     await UserActivityLog.create({
-      actorId: req.user.id,
-      targetUserId: req.user.id,
+      actorId: userId,
+      targetUserId: userId,
       action: "UPDATE_PROFILE",
       details: {
-        fields: ["firstName", "lastName", "email"],
+        fields: Object.keys(updates),
       },
+    });
+
+    return res.status(200).json({
+      message: "Profile updated successfully",
+      user: updatedUser,
     });
   } catch (error) {
     console.error("Error updating user profile:", error);
 
     if (error.code === "23505") {
-      // Unique violation (e.g., email already exists)
       return res.status(400).json({ message: "Email already in use" });
     }
 
-    res.status(500).json({ message: "Server Error" });
+    return res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -268,12 +263,62 @@ const getUserActivityLogs = async (req, res) => {
   }
 };
 
+const changeMyPassword = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        message: "Current and new password are required",
+      });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // بررسی صحت رمز فعلی
+    const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Current password is incorrect",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await User.updatePassword(userId, hashedPassword);
+
+    await UserActivityLog.create({
+      actorId: userId,
+      targetUserId: userId,
+      action: "CHANGE_MY_PASSWORD",
+    });
+
+    return res.status(200).json({
+      message: "Password changed successfully",
+    });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    return res.status(500).json({
+      message: "Server Error",
+    });
+  }
+};
+
 module.exports = {
   getAllUsersForAdmin,
   toggleUserStatus,
   getMyProfile,
   updateMyProfile,
   resetUserPassword,
+  changeMyPassword,
   changeUserRole,
   toggleUserActive,
   getAllUsersForManager,

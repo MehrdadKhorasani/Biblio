@@ -59,4 +59,6 @@ router.get(
   userController.getUserActivityLogs,
 );
 
+router.patch("/me/password", authenticate, userController.changeMyPassword);
+
 module.exports = router;

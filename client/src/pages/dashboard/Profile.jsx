@@ -3,7 +3,7 @@ import axios from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { updateUser } = useAuth();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -12,6 +12,11 @@ const Profile = () => {
 
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -35,11 +40,45 @@ const Profile = () => {
     }));
   };
 
+  const handlePasswordChange = (e) => {
+    setPasswordData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setMessage("رمز جدید و تکرار آن یکسان نیست");
+      return;
+    }
+
+    try {
+      await axios.patch("/users/me/password", {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+
+      setMessage("رمز عبور با موفقیت تغییر کرد");
+
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (err) {
+      setMessage(err.response?.data?.message || "خطا در تغییر رمز عبور");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      await axios.patch("/users/me", formData);
+      const res = await axios.patch("/users/me", formData);
+      updateUser(res.data.user);
       setMessage("اطلاعات با موفقیت بروزرسانی شد");
     } catch (err) {
       console.error(err);
@@ -98,6 +137,54 @@ const Profile = () => {
           className="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700"
         >
           ذخیره تغییرات
+        </button>
+      </form>
+      <hr className="my-10" />
+
+      <h3 className="text-xl font-bold mb-4">تغییر رمز عبور</h3>
+
+      <form onSubmit={handlePasswordSubmit} className="space-y-4 max-w-md">
+        <div>
+          <label className="block mb-1">رمز فعلی</label>
+          <input
+            type="password"
+            name="currentPassword"
+            value={passwordData.currentPassword}
+            onChange={handlePasswordChange}
+            className="w-full border rounded p-2"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1">رمز جدید</label>
+          <input
+            type="password"
+            name="newPassword"
+            value={passwordData.newPassword}
+            onChange={handlePasswordChange}
+            className="w-full border rounded p-2"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1">تکرار رمز جدید</label>
+          <input
+            type="password"
+            name="confirmPassword"
+            value={passwordData.confirmPassword}
+            onChange={handlePasswordChange}
+            className="w-full border rounded p-2"
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700"
+        >
+          تغییر رمز
         </button>
       </form>
     </div>

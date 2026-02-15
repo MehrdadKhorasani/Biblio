@@ -125,6 +125,20 @@ const User = {
     return result.rows[0];
   },
 
+  async updatePassword(id, passwordHash) {
+    const result = await db.query(
+      `
+    UPDATE "User"
+    SET "passwordHash" = $1, "updatedAt" = CURRENT_TIMESTAMP
+    WHERE id = $2
+    RETURNING id;
+    `,
+      [passwordHash, id],
+    );
+
+    return result.rows[0];
+  },
+
   async updatedById(id, updates) {
     const fields = [];
     const values = [];
