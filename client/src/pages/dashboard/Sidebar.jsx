@@ -1,4 +1,5 @@
 import { useAuth } from "../../context/AuthContext";
+import { Link } from "react-router-dom";
 
 const Sidebar = () => {
   const { user } = useAuth();
@@ -9,18 +10,35 @@ const Sidebar = () => {
 
       <ul className="space-y-3">
         {/* مشترک */}
-        <li className="hover:bg-gray-700 p-2 rounded cursor-pointer">
-          داشبورد
+        <li>
+          <Link to="/dashboard" className="block hover:bg-gray-700 p-2 rounded">
+            داشبورد
+          </Link>
         </li>
 
         {/* USER */}
         {user.roleId === 1 && (
           <>
-            <li className="hover:bg-gray-700 p-2 rounded cursor-pointer">
-              سفارش‌های من
+            <li>
+              <Link to="/" className="block hover:bg-gray-700 p-2 rounded">
+                بازگشت به فروشگاه
+              </Link>
             </li>
-            <li className="hover:bg-gray-700 p-2 rounded cursor-pointer">
-              پروفایل
+            <li>
+              <Link
+                to="/dashboard/orders"
+                className="block hover:bg-gray-700 p-2 rounded"
+              >
+                سفارش‌های من
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/dashboard/profile"
+                className="block hover:bg-gray-700 p-2 rounded"
+              >
+                پروفایل
+              </Link>
             </li>
           </>
         )}

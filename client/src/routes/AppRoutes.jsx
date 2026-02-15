@@ -9,10 +9,13 @@ import Home from "../pages/home/Home";
 import BookDetail from "../pages/BookDetails";
 import Cart from "../pages/Cart";
 import Checkout from "../pages/Checkout";
-import MyOrder from "../pages/dashboard/MyOrders";
-import Dashboard from "../pages/dashboard/Dashboard";
 import OrderSuccess from "../pages/OrderSuccess";
+
 import OrderDetails from "../pages/orders/OrderDetails";
+import MyOrders from "../pages/dashboard/MyOrders";
+import DashboardLayout from "../pages/dashboard/DashboardLayout";
+import UserPanel from "../pages/dashboard/UserPanel";
+import Profile from "../pages/dashboard/Profile";
 
 const AppRoutes = () => {
   return (
@@ -28,14 +31,15 @@ const AppRoutes = () => {
       {/* Private */}
       <Route element={<PrivateRoute />}>
         <Route path="/checkout" element={<Checkout />} />
-        <Route path="/orders" element={<MyOrder />} />
-        <Route path="/orders/:id" element={<OrderDetails />} />
-        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/order-success" element={<OrderSuccess />} />
-      </Route>
 
-      <Route element={<PrivateRoute allowedRoles={[2]} />}>
-        <Route path="/admin" element={<Dashboard />} />
+        {/* Dashboard Layout */}
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route index element={<UserPanel />} />
+          <Route path="orders" element={<MyOrders />} />
+          <Route path="orders/:id" element={<OrderDetails />} />
+          <Route path="profile" element={<Profile />} />
+        </Route>
       </Route>
 
       {/* Fallback */}
