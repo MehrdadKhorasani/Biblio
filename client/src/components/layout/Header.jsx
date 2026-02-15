@@ -13,7 +13,6 @@ const Header = () => {
   return (
     <header className="w-full bg-white shadow-sm" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        {/* راست: لوگو */}
         <Link to="/" className="text-xl font-bold text-indigo-600">
           📚 بیبلیو
         </Link>
@@ -43,6 +42,7 @@ const Header = () => {
               )}
             </div>
           </Link>
+
           {user ? (
             <Link
               to="/dashboard"
@@ -52,12 +52,20 @@ const Header = () => {
               داشبورد
             </Link>
           ) : (
-            <Link
-              to="/login"
-              className="text-sm text-indigo-600 hover:underline"
-            >
-              ورود / ثبت‌نام
-            </Link>
+            <div className="flex gap-3">
+              <Link
+                to="/login"
+                className="text-sm text-indigo-600 hover:underline"
+              >
+                ورود
+              </Link>
+              <Link
+                to="/register"
+                className="text-sm text-indigo-600 hover:underline"
+              >
+                ثبت‌نام
+              </Link>
+            </div>
           )}
         </div>
       </div>

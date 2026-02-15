@@ -1,5 +1,6 @@
 psql_hist.txt
 docs
+structure.txt
 server/node_modules/
 server/.env
 client/node_modules/

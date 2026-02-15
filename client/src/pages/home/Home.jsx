@@ -1,12 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 import Header from "../../components/layout/Header";
 import Hero from "../../components/home/Hero";
 import Footer from "../../components/layout/Footer";
 import CategorySection from "../../components/categories/CategorySection";
 import BookList from "../../components/books/BookList";
-import { books } from "../../mock/books";
-
 import { toPersianNumber } from "../../utils/toPersianNumbers";
 
 const ITEMS_PER_PAGE = 4;
@@ -14,23 +13,35 @@ const ITEMS_PER_PAGE = 4;
 const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [books, setBooks] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const filteredBooks = selectedCategory
-    ? books.filter((b) => Number(b.categoryId) === Number(selectedCategory))
-    : books;
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/api/books", {
+          params: {
+            categoryId: selectedCategory,
+            page: currentPage,
+            limit: ITEMS_PER_PAGE,
+          },
+        });
 
-  const totalPages = Math.ceil(filteredBooks.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        setBooks(response.data.books);
+        setTotalPages(response.data.pagination.totalPages);
+      } catch (error) {
+        console.error("Error fetching books:", error);
+      }
+    };
 
-  const paginatedBooks = filteredBooks.slice(
-    startIndex,
-    startIndex + ITEMS_PER_PAGE,
-  );
+    fetchBooks();
+  }, [selectedCategory, currentPage]);
 
   return (
     <div>
       <Header />
       <Hero />
+
       <CategorySection
         selectedCategory={selectedCategory}
         setSelectedCategory={(id) => {
@@ -39,7 +50,8 @@ const Home = () => {
         }}
       />
 
-      <BookList books={paginatedBooks} />
+      <BookList books={books} />
+
       <div className="flex justify-center mt-8 gap-2" dir="rtl">
         {Array.from({ length: totalPages }).map((_, index) => (
           <button
@@ -53,6 +65,7 @@ const Home = () => {
           </button>
         ))}
       </div>
+
       <Footer />
     </div>
   );

@@ -43,7 +43,8 @@ const getAllBooks = async (req, res) => {
 
     let books = result.books;
 
-    if (req.user && req.user.roleId === ROLES.USER) {
+    if (!req.user) books = books.filter((b) => b.isAvailable && b.stock > 0);
+    else if (req.user && req.user.roleId === ROLES.USER) {
       books = books.filter((b) => b.isAvailable === true && b.stock > 0);
     }
 
@@ -60,13 +61,29 @@ const getAllBooks = async (req, res) => {
 const getBookById = async (req, res) => {
   try {
     const bookId = parseInt(req.params.id);
-    const book = await Book.findById(bookId, { includeDeleted });
+
+    // تعیین اینکه آیا کاربر اجازه دیدن deleted دارد یا نه
+    const includeDeleted =
+      req.user &&
+      (req.user.roleId === ROLES.ADMIN || req.user.roleId === ROLES.MANAGER);
+
+    const book = await Book.findById(bookId, {
+      includeDeleted: includeDeleted || false,
+    });
 
     if (!book) {
       return res.status(404).json({ message: "Book not found" });
     }
 
+    if (!req.user && (!book.isAvailable || book.stock <= 0)) {
+      return res.status(403).json({
+        message:
+          "این کتاب در حال حاضر موجود نیست. برای مشاهده کامل لطفا لاگین کنید",
+      });
+    }
+
     if (
+      req.user &&
       req.user.roleId === ROLES.USER &&
       (!book.isAvailable || book.stock <= 0)
     ) {

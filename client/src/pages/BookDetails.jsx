@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
-import { books } from "../mock/books";
-import { categories } from "../mock/categories";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { useCart } from "../context/CartContext";
 import { toPersianNumber } from "../utils/toPersianNumbers";
 import Header from "../components/layout/Header";
@@ -9,21 +9,49 @@ import Footer from "../components/layout/Footer";
 const BookDetails = () => {
   const { id } = useParams();
 
-  const book = books.find((b) => b.id === Number(id));
+  const [book, setBook] = useState(null);
+  const [relatedBooks, setRelatedBooks] = useState([]);
 
   const { addToCart, increaseQuantity, decreaseQuantity, getItemQuantity } =
     useCart();
 
+  useEffect(() => {
+    const fetchBook = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/api/books/${id}`,
+        );
+
+        const fetchedBook = response.data.book;
+        setBook(fetchedBook);
+
+        // گرفتن کتاب‌های مرتبط
+        const relatedResponse = await axios.get(
+          `http://localhost:3000/api/books`,
+          {
+            params: {
+              categoryId: fetchedBook.categoryId,
+              limit: 4,
+            },
+          },
+        );
+
+        const filteredRelated = relatedResponse.data.books.filter(
+          (b) => b.id !== fetchedBook.id,
+        );
+
+        setRelatedBooks(filteredRelated);
+      } catch (error) {
+        console.error("Error fetching book details:", error);
+      }
+    };
+
+    fetchBook();
+  }, [id]);
+
   if (!book) {
-    return <div className="text-center py-20">کتاب پیدا نشد</div>;
+    return <div className="text-center py-20">در حال بارگذاری...</div>;
   }
-
-  // گرفتن نام دسته‌بندی از categoryId
-  const category = categories.find((c) => c.id === book.categoryId);
-
-  const relatedBooks = books
-    .filter((b) => b.categoryId === book.categoryId && b.id !== book.id)
-    .slice(0, 4);
 
   const quantity = getItemQuantity(book.id);
 
@@ -33,23 +61,23 @@ const BookDetails = () => {
 
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="grid md:grid-cols-2 gap-10 bg-white p-6 rounded-lg shadow">
-          {/* ستون تصویر */}
+          {/* تصویر */}
           <div className="flex justify-center">
             <img
-              src={book.image}
+              src={book.coverImage}
               alt={book.title}
               className="w-72 md:w-96 rounded-lg shadow"
             />
           </div>
 
-          {/* ستون اطلاعات */}
+          {/* اطلاعات */}
           <div className="text-right">
             <h1 className="text-3xl font-bold mb-4">{book.title}</h1>
 
             <p className="text-gray-600 mb-2">نویسنده: {book.author}</p>
 
             <p className="text-sm text-gray-500 mb-4">
-              دسته‌بندی: {category ? category.title : "نامشخص"}
+              دسته‌بندی: {book.categoryName || "نامشخص"}
             </p>
 
             <div className="space-y-2 text-sm text-gray-700 mb-6">
@@ -64,12 +92,12 @@ const BookDetails = () => {
               </p>
 
               <p>
-                ISBN: <span className="font-medium">{book.isbn}</span>
+                ISBN: <span className="font-medium">{book.ISBN}</span>
               </p>
 
               <p>
                 وضعیت:
-                {book.inStock ? (
+                {book.stock > 0 && book.isAvailable ? (
                   <span className="text-green-600 font-medium mr-1">موجود</span>
                 ) : (
                   <span className="text-red-600 font-medium mr-1">ناموجود</span>
@@ -84,9 +112,9 @@ const BookDetails = () => {
               </span>
             </div>
 
-            {/* کنترل سبد خرید */}
+            {/* سبد خرید */}
             <div className="mt-4">
-              {!book.inStock ? (
+              {book.stock <= 0 || !book.isAvailable ? (
                 <button
                   disabled
                   className="bg-gray-300 text-gray-600 px-6 py-3 rounded cursor-not-allowed"
@@ -134,7 +162,7 @@ const BookDetails = () => {
           </p>
         </div>
 
-        {/* کتاب‌های مرتبط */}
+        {/* مرتبط */}
         {relatedBooks.length > 0 && (
           <div className="mt-16">
             <h2 className="text-2xl font-bold mb-6">کتاب‌های مرتبط</h2>
@@ -144,7 +172,7 @@ const BookDetails = () => {
                 <Link key={related.id} to={`/book/${related.id}`}>
                   <div className="bg-white p-3 rounded shadow hover:shadow-lg transition text-right">
                     <img
-                      src={related.image}
+                      src={related.coverImage}
                       alt={related.title}
                       className="h-40 w-full object-cover rounded mb-3"
                     />

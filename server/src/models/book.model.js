@@ -65,14 +65,18 @@ const Book = {
   },
 
   async findById(id, { includeDeleted = false } = {}) {
+    let conditions = [`b.id = $1`];
+    if (!includeDeleted) {
+      conditions.push(`b."isDeleted" = false`);
+    }
+
     const query = `
         SELECT 
           b.*,
           c.name AS "categoryName"
         FROM "Book" b
         LEFT JOIN "Category" c ON c.id = b."categoryId"
-        WHERE b.id = $1;
-        ${includeDeleted ? "" : 'AND b."isDeleted" = false'};
+        WHERE ${conditions.join(" AND ")} 
         `;
 
     const result = await db.query(query, [id]);
