@@ -29,6 +29,12 @@ const authenticate = async (req, res, next) => {
       });
     }
 
+    if (decoded.tokenVersion !== user.tokenVersion) {
+      return res.status(401).json({
+        message: "Token expired. Please login again.",
+      });
+    }
+
     if (!user.isActive) {
       return res.status(403).json({
         message: "Your account has been deactivated.",

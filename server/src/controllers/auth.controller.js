@@ -34,6 +34,7 @@ const login = async (req, res) => {
       {
         id: user.id,
         roleId: user.roleId,
+        tokenVersion: user.tokenVersion,
       },
       process.env.JWT_SECRET,
       {

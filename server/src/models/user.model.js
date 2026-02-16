@@ -44,6 +44,7 @@ const User = {
         email: row.email,
         passwordHash: row.passwordHash,
         roleId: row.roleId,
+        tokenVersion: row.tokenVersion,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
       };
@@ -163,6 +164,16 @@ const User = {
 
     const result = await db.query(query, values);
     return result.rows[0];
+  },
+
+  async increamentTokenVersion(userId) {
+    const result = await db.query(
+      `UPDATE "User"
+      SET "tokenVersion" = "tokenVersion" + 1
+      WHERE id = $1
+      RETURNING *`,
+      [userId],
+    );
   },
 };
 

@@ -274,6 +274,12 @@ const changeMyPassword = async (req, res) => {
       });
     }
 
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        message: "New password must be at least 8 characters long",
+      });
+    }
+
     const user = await User.findById(userId);
 
     if (!user) {
@@ -282,7 +288,6 @@ const changeMyPassword = async (req, res) => {
       });
     }
 
-    // بررسی صحت رمز فعلی
     const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
 
     if (!isMatch) {
@@ -291,9 +296,19 @@ const changeMyPassword = async (req, res) => {
       });
     }
 
+    const isSamePassword = await bcrypt.compare(newPassword, user.passwordHash);
+
+    if (isSamePassword) {
+      return res.status(400).json({
+        message: "New password must be different from current password",
+      });
+    }
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     await User.updatePassword(userId, hashedPassword);
+
+    await User.increamentTokenVersion(userId);
 
     await UserActivityLog.create({
       actorId: userId,
