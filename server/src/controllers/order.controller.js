@@ -285,7 +285,10 @@ const updateOrderStatus = async (req, res) => {
 const getAdminOrders = async (req, res) => {
   try {
     const { status, userId, page = 1, limit = 20 } = req.query;
-    const offset = (page - 1) * limit;
+
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
+    const offset = (pageNumber - 1) * limitNumber;
 
     let query = `
       SELECT 
@@ -294,11 +297,13 @@ const getAdminOrders = async (req, res) => {
         u."lastName",
         oi.id as "orderItemId",
         oi."bookId",
+        b.title AS "bookTitle",
         oi.quantity,
         oi."unitPrice"
       FROM "Order" o
       LEFT JOIN "OrderItem" oi ON o.id = oi."orderId"
       LEFT JOIN "User" u ON o."userId" = u.id
+      LEFT JOIN "Book" b ON oi."bookId" = b.id
     `;
 
     const conditions = [];
@@ -318,9 +323,14 @@ const getAdminOrders = async (req, res) => {
       query += ` WHERE ${conditions.join(" AND ")}`;
     }
 
-    values.push(limit);
+    values.push(limitNumber);
     values.push(offset);
-    query += ` ORDER BY o."createdAt" DESC LIMIT $${values.length - 1} OFFSET $${values.length}`;
+
+    query += `
+      ORDER BY o."createdAt" DESC
+      LIMIT $${values.length - 1}
+      OFFSET $${values.length}
+    `;
 
     const result = await db.query(query, values);
 
@@ -331,7 +341,11 @@ const getAdminOrders = async (req, res) => {
         ordersMap[row.id] = {
           id: row.id,
           userId: row.userId,
-          userName: row.userName,
+          user: {
+            id: row.userId,
+            firstName: row.firstName,
+            lastName: row.lastName,
+          },
           status: row.status,
           totalPrice: row.totalPrice,
           note: row.note,
@@ -344,7 +358,10 @@ const getAdminOrders = async (req, res) => {
       if (row.orderItemId) {
         ordersMap[row.id].items.push({
           id: row.orderItemId,
-          bookId: row.bookId,
+          book: {
+            id: row.bookId,
+            title: row.bookTitle,
+          },
           quantity: row.quantity,
           unitPrice: row.unitPrice,
         });
@@ -353,21 +370,24 @@ const getAdminOrders = async (req, res) => {
 
     const orders = Object.values(ordersMap);
 
+    // -------- Count Query --------
     let countQuery = `SELECT COUNT(*) FROM "Order" o`;
     if (conditions.length > 0) {
       countQuery += ` WHERE ${conditions.join(" AND ")}`;
     }
+
     const countResult = await db.query(
       countQuery,
       values.slice(0, values.length - 2),
     );
+
     const total = parseInt(countResult.rows[0].count, 10);
 
     res.status(200).json({
-      page: Number(page),
-      limit: Number(limit),
+      page: pageNumber,
+      limit: limitNumber,
       total,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(total / limitNumber),
       orders,
     });
   } catch (error) {

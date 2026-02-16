@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import api from "../../api/axios";
+import { toPersianNumber } from "../../utils/toPersianNumbers";
+import { orderStatusToPersian } from "../../utils/orderStatusToPersian";
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -68,6 +70,41 @@ const AdminOrders = () => {
       return [];
     }
   };
+  const renderAdminAction = (order) => {
+    switch (order.status) {
+      case "pending":
+        return (
+          <span className="text-amber-500 font-medium text-sm">
+            در انتظار اقدام کاربر
+          </span>
+        );
+
+      case "paid":
+        return (
+          <button
+            onClick={() => handleStatusChange(order.id, "shipped")}
+            className="px-3 py-1.5 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-200"
+          >
+            ارسال سفارش
+          </button>
+        );
+
+      case "shipped":
+        return (
+          <button
+            onClick={() => handleStatusChange(order.id, "delivered")}
+            className="px-3 py-1.5 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700 transition duration-200"
+          >
+            تحویل شد
+          </button>
+        );
+
+      case "cancelled":
+      case "delivered":
+      default:
+        return <span className="text-gray-400 text-sm">عملیاتی ندارد</span>;
+    }
+  };
 
   if (loading)
     return (
@@ -100,23 +137,29 @@ const AdminOrders = () => {
             <tbody>
               {orders.map((order) => (
                 <tr key={order.id} className="hover:bg-gray-50">
-                  <td className="py-2 px-4 border-b text-center">{order.id}</td>
                   <td className="py-2 px-4 border-b text-center">
-                    {order.userId}
+                    {toPersianNumber(order.id)}
+                  </td>
+                  <td className="py-2 px-4 border-b text-center">
+                    {order.user
+                      ? `${order.user.firstName} ${order.user.lastName}`
+                      : "نامشخص"}
                   </td>
                   <td className="py-2 px-4 border-b text-center capitalize">
-                    {order.status}
+                    {orderStatusToPersian(order.status)}
                   </td>
                   <td className="py-2 px-4 border-b text-center">
-                    {order.totalPrice.toLocaleString()} تومان
+                    {toPersianNumber(order.totalPrice.toLocaleString())} تومان
                   </td>
                   <td className="py-2 px-4 border-b">
                     {order.items?.length > 0 ? (
                       <ul className="list-disc list-inside">
                         {order.items.map((item) => (
                           <li key={item.id}>
-                            کتاب {item.bookId} × {item.quantity} (
-                            {item.unitPrice.toLocaleString()} تومان)
+                            کتاب {item.book?.title || "نامشخص"} ×{" "}
+                            {toPersianNumber(item.quantity)} (
+                            {toPersianNumber(item.unitPrice.toLocaleString())}{" "}
+                            تومان)
                           </li>
                         ))}
                       </ul>
@@ -124,42 +167,10 @@ const AdminOrders = () => {
                       <span className="text-gray-400">هیچ آیتمی ندارد</span>
                     )}
                   </td>
-                  <td className="py-2 px-4 border-b space-y-1 flex flex-col items-center">
-                    {order.status === "pending" && (
-                      <>
-                        <button
-                          onClick={() => handlePay(order.id)}
-                          className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
-                        >
-                          پرداخت شد
-                        </button>
-                        <button
-                          onClick={() => handleCancel(order.id)}
-                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                        >
-                          لغو
-                        </button>
-                      </>
-                    )}
-                    {order.status === "paid" && (
-                      <button
-                        onClick={() => handleStatusChange(order.id, "shipped")}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                      >
-                        ارسال شد
-                      </button>
-                    )}
-                    {order.status === "shipped" && (
-                      <button
-                        onClick={() =>
-                          handleStatusChange(order.id, "delivered")
-                        }
-                        className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded"
-                      >
-                        تحویل داده شد
-                      </button>
-                    )}
+                  <td className="py-2 px-4 border-b">
+                    {renderAdminAction(order)}
                   </td>
+
                   <td className="py-2 px-4 border-b">
                     <StatusHistory
                       orderId={order.id}
@@ -201,7 +212,9 @@ const StatusHistory = ({ orderId, fetchHistory }) => {
           {history.length > 0 ? (
             history.map((h) => (
               <li key={h.id}>
-                {h.oldStatus} → {h.newStatus} توسط {h.changedBy} در{" "}
+                {orderStatusToPersian(h.oldStatus)} ←{" "}
+                {orderStatusToPersian(h.newStatus)} توسط{" "}
+                {h.changedBy || "سیستم"} در{" "}
                 {new Date(h.createdAt).toLocaleString("fa-IR")}
               </li>
             ))
