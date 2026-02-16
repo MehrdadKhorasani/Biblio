@@ -36,16 +36,16 @@ const OrderItem = {
 
   async findByOrderId(orderId) {
     const query = `
-      SELECT 
-        oi."bookId",
-        b.title,
-        b.coverImage AS image,
-        oi.quantity,
-        oi."unitPrice"
-      FROM "OrderItem" AS oi
-      INNER JOIN "Book" AS b ON b.id = oi."bookId"
-      WHERE oi."orderId" = $1;
-    `;
+    SELECT 
+      oi."bookId",
+      b.title,
+      b."coverImage" AS image,
+      oi.quantity,
+      oi."unitPrice"
+    FROM "OrderItem" AS oi
+    INNER JOIN "Book" AS b ON b.id = oi."bookId"
+    WHERE oi."orderId" = $1;
+  `;
     const result = await db.query(query, [orderId]);
     return result.rows;
   },

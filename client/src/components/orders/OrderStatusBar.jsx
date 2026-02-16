@@ -1,4 +1,5 @@
 import { orderStatusToPersian } from "../../utils/orderStatusToPersian";
+import { toPersianNumber } from "../../utils/toPersianNumbers";
 
 const getOrderSteps = (status) => {
   const stepsNormal = ["pending", "paid", "shipped", "delivered"];
@@ -29,7 +30,7 @@ const OrderStatusBar = ({ currentStatus }) => {
               className={`w-6 h-6 rounded-full flex items-center justify-center
                 ${isCompleted ? "bg-green-500 text-white" : "bg-gray-300 text-gray-500"}`}
             >
-              {index + 1}
+              {toPersianNumber(index + 1)}
             </div>
 
             {/* نام وضعیت */}

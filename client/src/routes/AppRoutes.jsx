@@ -16,6 +16,8 @@ import MyOrders from "../pages/dashboard/MyOrders";
 import DashboardLayout from "../pages/dashboard/DashboardLayout";
 import UserPanel from "../pages/dashboard/UserPanel";
 import Profile from "../pages/dashboard/Profile";
+import RoleRedirect from "../pages/dashboard/RoleRedirect";
+import AdminOrders from "../pages/dashboard/AdminOrders";
 
 const AppRoutes = () => {
   return (
@@ -30,15 +32,29 @@ const AppRoutes = () => {
 
       {/* Private */}
       <Route element={<PrivateRoute />}>
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/order-success" element={<OrderSuccess />} />
-
-        {/* Dashboard Layout */}
         <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<UserPanel />} />
-          <Route path="orders" element={<MyOrders />} />
-          <Route path="orders/:id" element={<OrderDetails />} />
-          <Route path="profile" element={<Profile />} />
+          {/* Redirect بر اساس نقش */}
+          <Route index element={<RoleRedirect />} />
+
+          {/* USER */}
+          <Route element={<PrivateRoute allowedRoles={[1]} />}>
+            <Route path="orders" element={<MyOrders />} />
+            <Route path="orders/:id" element={<OrderDetails />} />
+            <Route path="profile" element={<Profile />} />
+          </Route>
+
+          {/* ADMIN */}
+          <Route element={<PrivateRoute allowedRoles={[2]} />}>
+            <Route path="admin" element={<div>پنل ادمین</div>} />
+            <Route path="admin/orders" element={<AdminOrders />} />
+            <Route path="admin/books" element={<div>مدیریت کتاب‌ها</div>} />
+          </Route>
+
+          {/* MANAGER */}
+          <Route element={<PrivateRoute allowedRoles={[3]} />}>
+            <Route path="manager" element={<div>پنل مدیر</div>} />
+            <Route path="manager/users" element={<div>مدیریت کاربران</div>} />
+          </Route>
         </Route>
       </Route>
 

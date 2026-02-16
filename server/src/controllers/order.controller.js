@@ -203,7 +203,14 @@ const payOrder = async (req, res) => {
         .json({ message: "Only pending orders can be paid" });
     }
 
-    const updatedOrder = await Order.updateStatus(orderId, "paid");
+    const updatedOrder = await Order.updateStatus(orderId, "paid", null);
+
+    await OrderStatusHistory.create({
+      orderId: orderId,
+      oldStatus: order.status,
+      newStatus: "paid",
+      changedBy: userId,
+    });
 
     res.status(200).json({
       message: "Order paid successfully",
@@ -236,37 +243,23 @@ const updateOrderStatus = async (req, res) => {
     const { status } = req.body;
     const adminId = req.user.id;
 
-    const allowedStatuses = ["paid", "shipped", "delivered"];
-
-    if (!allowedStatuses.includes(status)) {
-      return res.status(400).json({
-        message: "Invalid order status",
-      });
-    }
+    const statusFlow = {
+      pending: ["paid"],
+      paid: ["shipped"],
+      shipped: ["delivered"],
+      delivered: [],
+      cancelled: [],
+    };
 
     const order = await Order.findById(orderId);
 
     if (!order) {
-      return res.status(404).json({
-        message: "Order not found",
-      });
+      return res.status(404).json({ message: "Order not found" });
     }
 
-    if (order.status === "cancelled" || order.status === "delivered") {
+    if (!statusFlow[order.status]?.includes(status)) {
       return res.status(400).json({
-        message: "This order cannot be updated",
-      });
-    }
-
-    if (status === "shipped" && order.status !== "paid") {
-      return res.status(400).json({
-        message: "Only paid orders can be shipped",
-      });
-    }
-
-    if (status === "delivered" && order.status !== "shipped") {
-      return res.status(400).json({
-        message: "Only shipped orders can be delivered",
+        message: `Cannot change status from ${order.status} to ${status}`,
       });
     }
 
@@ -277,7 +270,7 @@ const updateOrderStatus = async (req, res) => {
       changedBy: adminId,
     });
 
-    const updatedOrder = await Order.updateStatus(orderId, status);
+    const updatedOrder = await Order.updateStatus(orderId, status, adminId);
 
     res.status(200).json({
       message: "Order status updated successfully",
@@ -291,21 +284,92 @@ const updateOrderStatus = async (req, res) => {
 
 const getAdminOrders = async (req, res) => {
   try {
-    const { status } = req.query;
+    const { status, userId, page = 1, limit = 20 } = req.query;
+    const offset = (page - 1) * limit;
 
-    let orders;
+    let query = `
+      SELECT 
+        o.*,
+        u."firstName",
+        u."lastName",
+        oi.id as "orderItemId",
+        oi."bookId",
+        oi.quantity,
+        oi."unitPrice"
+      FROM "Order" o
+      LEFT JOIN "OrderItem" oi ON o.id = oi."orderId"
+      LEFT JOIN "User" u ON o."userId" = u.id
+    `;
+
+    const conditions = [];
+    const values = [];
+
     if (status) {
-      orders = await Order.findByStatus(status);
-    } else {
-      orders = await Order.findAll();
+      values.push(status);
+      conditions.push(`o.status = $${values.length}`);
     }
 
-    for (const order of orders) {
-      const items = await OrderItem.findByOrderId(order.id);
-      order.items = items;
+    if (userId) {
+      values.push(userId);
+      conditions.push(`o."userId" = $${values.length}`);
     }
 
-    res.status(200).json({ orders });
+    if (conditions.length > 0) {
+      query += ` WHERE ${conditions.join(" AND ")}`;
+    }
+
+    values.push(limit);
+    values.push(offset);
+    query += ` ORDER BY o."createdAt" DESC LIMIT $${values.length - 1} OFFSET $${values.length}`;
+
+    const result = await db.query(query, values);
+
+    const ordersMap = {};
+
+    for (const row of result.rows) {
+      if (!ordersMap[row.id]) {
+        ordersMap[row.id] = {
+          id: row.id,
+          userId: row.userId,
+          userName: row.userName,
+          status: row.status,
+          totalPrice: row.totalPrice,
+          note: row.note,
+          createdAt: row.createdAt,
+          updatedAt: row.updatedAt,
+          items: [],
+        };
+      }
+
+      if (row.orderItemId) {
+        ordersMap[row.id].items.push({
+          id: row.orderItemId,
+          bookId: row.bookId,
+          quantity: row.quantity,
+          unitPrice: row.unitPrice,
+        });
+      }
+    }
+
+    const orders = Object.values(ordersMap);
+
+    let countQuery = `SELECT COUNT(*) FROM "Order" o`;
+    if (conditions.length > 0) {
+      countQuery += ` WHERE ${conditions.join(" AND ")}`;
+    }
+    const countResult = await db.query(
+      countQuery,
+      values.slice(0, values.length - 2),
+    );
+    const total = parseInt(countResult.rows[0].count, 10);
+
+    res.status(200).json({
+      page: Number(page),
+      limit: Number(limit),
+      total,
+      totalPages: Math.ceil(total / limit),
+      orders,
+    });
   } catch (error) {
     console.error("Error fetching admin orders:", error);
     res.status(500).json({ message: "Server Error" });
@@ -336,7 +400,7 @@ const getOrderById = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    if (order.userId !== userId) {
+    if (order.userId !== userId && req.user.roleId === 1) {
       return res.status(403).json({ message: "Access denied" });
     }
 

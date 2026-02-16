@@ -4,19 +4,18 @@ const orderController = require("../controllers/order.controller");
 const authenticate = require("../middlewares/auth.middleware");
 const authorizeAdmin = require("../middlewares/authorizeAdmin");
 
-//router.get("/", authenticate, orderController.getAllOrders);
-router.get("/my", authenticate, orderController.getUserOrders);
-router.get("/:id", authenticate, orderController.getOrderById);
-router.post("/", authenticate, orderController.createOrder);
-router.patch("/:id/cancel", authenticate, orderController.cancelOrder);
-router.post("/:id/pay", authenticate, orderController.payOrder);
-
 router.get(
   "/admin",
   authenticate,
   authorizeAdmin,
   orderController.getAdminOrders,
 );
+
+router.get("/my", authenticate, orderController.getUserOrders);
+router.get("/:id", authenticate, orderController.getOrderById);
+router.post("/", authenticate, orderController.createOrder);
+router.patch("/:id/cancel", authenticate, orderController.cancelOrder);
+router.post("/:id/pay", authenticate, orderController.payOrder);
 
 router.patch(
   "/:id/status",

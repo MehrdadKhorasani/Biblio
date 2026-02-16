@@ -22,7 +22,7 @@ const Order = {
       postalCode,
     ];
     const executor = client || db;
-    const result = await db.query(query, values);
+    const result = await executor.query(query, values);
     return result.rows[0];
   },
 
@@ -89,7 +89,7 @@ const Order = {
     await db.query(
       `
             UPDATE "Order" SET
-                status = 'canceled',
+                status = 'cancelled',
                 "updatedAt" = CURRENT_TIMESTAMP
             WHERE id = $1;
         `,
@@ -109,6 +109,97 @@ const Order = {
     );
 
     return result.rows;
+  },
+
+  async findAllWithItems() {
+    const query = `
+    SELECT 
+      o.*,
+      oi.id as "orderItemId",
+      oi."bookId",
+      oi.quantity,
+      oi."unitPrice"
+    FROM "Order" o
+    LEFT JOIN "OrderItem" oi
+      ON o.id = oi."orderId"
+    ORDER BY o."createdAt" DESC
+  `;
+
+    const result = await db.query(query);
+
+    const ordersMap = {};
+
+    for (const row of result.rows) {
+      if (!ordersMap[row.id]) {
+        ordersMap[row.id] = {
+          id: row.id,
+          userId: row.userId,
+          status: row.status,
+          totalPrice: row.totalPrice,
+          note: row.note,
+          createdAt: row.createdAt,
+          updatedAt: row.updatedAt,
+          items: [],
+        };
+      }
+
+      if (row.orderItemId) {
+        ordersMap[row.id].items.push({
+          id: row.orderItemId,
+          bookId: row.bookId,
+          quantity: row.quantity,
+          unitPrice: row.unitPrice,
+        });
+      }
+    }
+
+    return Object.values(ordersMap);
+  },
+
+  async findByStatusWithItems(status) {
+    const query = `
+    SELECT 
+      o.*,
+      oi.id as "orderItemId",
+      oi."bookId",
+      oi.quantity,
+      oi."unitPrice"
+    FROM "Order" o
+    LEFT JOIN "OrderItem" oi
+      ON o.id = oi."orderId"
+    WHERE o.status = $1
+    ORDER BY o."createdAt" DESC
+  `;
+
+    const result = await db.query(query, [status]);
+
+    const ordersMap = {};
+
+    for (const row of result.rows) {
+      if (!ordersMap[row.id]) {
+        ordersMap[row.id] = {
+          id: row.id,
+          userId: row.userId,
+          status: row.status,
+          totalPrice: row.totalPrice,
+          note: row.note,
+          createdAt: row.createdAt,
+          updatedAt: row.updatedAt,
+          items: [],
+        };
+      }
+
+      if (row.orderItemId) {
+        ordersMap[row.id].items.push({
+          id: row.orderItemId,
+          bookId: row.bookId,
+          quantity: row.quantity,
+          unitPrice: row.unitPrice,
+        });
+      }
+    }
+
+    return Object.values(ordersMap);
   },
 };
 

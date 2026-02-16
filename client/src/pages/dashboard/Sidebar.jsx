@@ -46,14 +46,21 @@ const Sidebar = () => {
         {/* ADMIN */}
         {user.roleId === 2 && (
           <>
-            <li className="hover:bg-gray-700 p-2 rounded cursor-pointer">
-              مدیریت کتاب‌ها
+            <li>
+              <Link
+                to="/dashboard/admin/orders"
+                className="block hover:bg-gray-700 p-2 rounded"
+              >
+                مدیریت سفارش‌ها
+              </Link>
             </li>
-            <li className="hover:bg-gray-700 p-2 rounded cursor-pointer">
-              دسته‌بندی‌ها
-            </li>
-            <li className="hover:bg-gray-700 p-2 rounded cursor-pointer">
-              سفارش‌ها
+            <li>
+              <Link
+                to="/dashboard/admin/books"
+                className="block hover:bg-gray-700 p-2 rounded"
+              >
+                مدیریت کتاب‌ها
+              </Link>
             </li>
           </>
         )}
