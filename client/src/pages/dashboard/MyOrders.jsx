@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../../api/axios";
-import Header from "../../components/layout/Header";
-import Footer from "../../components/layout/Footer";
 import { toPersianNumber } from "../../utils/toPersianNumbers";
+import { orderStatusToPersian } from "../../utils/orderStatusToPersian";
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -77,7 +76,7 @@ const MyOrders = () => {
                               : "bg-red-100 text-red-700"
                     }`}
                   >
-                    {order.status}
+                    {orderStatusToPersian(order.status)}
                   </span>
                 </div>
 
@@ -88,7 +87,7 @@ const MyOrders = () => {
 
                   <div className="flex gap-3">
                     <button
-                      onClick={() => navigate(`/orders/${order.id}`)}
+                      onClick={() => navigate(`/dashboard/orders/${order.id}`)}
                       className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
                     >
                       مشاهده جزئیات
@@ -109,8 +108,6 @@ const MyOrders = () => {
           </div>
         )}
       </div>
-
-      <Footer />
     </div>
   );
 };

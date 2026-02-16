@@ -39,6 +39,7 @@ const OrderItem = {
       SELECT 
         oi."bookId",
         b.title,
+        b.coverImage AS image,
         oi.quantity,
         oi."unitPrice"
       FROM "OrderItem" AS oi
