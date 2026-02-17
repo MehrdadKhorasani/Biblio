@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Header from "../../components/layout/Header";
 
@@ -10,16 +10,23 @@ const Login = () => {
 
   const { login } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const from = location.state?.from?.pathname || "/dashboard";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
     try {
       await login(email, password);
-      navigate(from, { replace: true });
+
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+
+      if (storedUser.roleId === 1) {
+        navigate("/dashboard/orders", { replace: true });
+      } else if (storedUser.roleId === 2) {
+        navigate("/dashboard/admin/orders", { replace: true });
+      } else if (storedUser.roleId === 3) {
+        navigate("/dashboard/manager", { replace: true });
+      }
     } catch (err) {
       setError("ایمیل یا رمز عبور اشتباه است", err);
     }
@@ -62,6 +69,7 @@ const Login = () => {
           >
             ورود
           </button>
+
           <p className="text-sm mt-4 text-center">
             <Link to="/register" className="text-indigo-600">
               ثبت‌نام کنید

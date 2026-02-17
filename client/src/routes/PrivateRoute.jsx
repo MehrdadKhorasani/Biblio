@@ -5,17 +5,12 @@ const PrivateRoute = ({ allowedRoles }) => {
   const { user, authLoading } = useAuth();
   const location = useLocation();
 
-  if (authLoading) {
-    return <div>در حال بارگذاری...</div>; // فقط وقتی async login/initial load داریم
-  }
+  if (authLoading) return <div>در حال بارگذاری...</div>;
 
-  if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
+  if (!user) return <Navigate to="/login" state={{ from: location }} replace />;
 
-  if (allowedRoles && !allowedRoles.includes(user.roleId)) {
+  if (allowedRoles && !allowedRoles.includes(user.roleId))
     return <Navigate to="/unauthorized" replace />;
-  }
 
   return <Outlet />;
 };
