@@ -17,6 +17,8 @@ import DashboardLayout from "../pages/dashboard/DashboardLayout";
 import Profile from "../pages/dashboard/Profile";
 import AdminOrders from "../pages/dashboard/AdminOrders";
 import AdminOrderDetails from "../pages/dashboard/AdminOrderDetails";
+import AdminBooks from "../pages/dashboard/AdminBooks";
+import EditBook from "../pages/dashboard/EditBook";
 
 const AppRoutes = () => {
   return (
@@ -47,6 +49,8 @@ const AppRoutes = () => {
           <Route element={<PrivateRoute allowedRoles={[2]} />}>
             <Route path="admin/orders" element={<AdminOrders />} />
             <Route path="admin/orders/:id" element={<AdminOrderDetails />} />
+            <Route path="admin/books" element={<AdminBooks />} />
+            <Route path="admin/books/edit/:id" element={<EditBook />} />
           </Route>
         </Route>
       </Route>
