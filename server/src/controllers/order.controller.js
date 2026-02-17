@@ -298,27 +298,18 @@ const updateOrderStatus = async (req, res) => {
 
 const getAdminOrders = async (req, res) => {
   try {
-    const { status, userId, page = 1, limit = 20 } = req.query;
+    let {
+      status,
+      userName,
+      page = 1,
+      limit = 10,
+      sortOrder = "desc",
+    } = req.query;
 
-    const pageNumber = Number(page);
-    const limitNumber = Number(limit);
-    const offset = (pageNumber - 1) * limitNumber;
-
-    let query = `
-      SELECT 
-        o.*,
-        u."firstName",
-        u."lastName",
-        oi.id as "orderItemId",
-        oi."bookId",
-        b.title AS "bookTitle",
-        oi.quantity,
-        oi."unitPrice"
-      FROM "Order" o
-      LEFT JOIN "OrderItem" oi ON o.id = oi."orderId"
-      LEFT JOIN "User" u ON o."userId" = u.id
-      LEFT JOIN "Book" b ON oi."bookId" = b.id
-    `;
+    page = Number(page);
+    limit = Number(limit);
+    const offset = (page - 1) * limit;
+    sortOrder = sortOrder.toLowerCase() === "asc" ? "ASC" : "DESC";
 
     const conditions = [];
     const values = [];
@@ -328,28 +319,42 @@ const getAdminOrders = async (req, res) => {
       conditions.push(`o.status = $${values.length}`);
     }
 
-    if (userId) {
-      values.push(userId);
-      conditions.push(`o."userId" = $${values.length}`);
+    if (userName) {
+      values.push(`%${userName}%`);
+      conditions.push(
+        `(u."firstName" || ' ' || u."lastName") ILIKE $${values.length}`,
+      );
     }
+
+    // کوئری اصلی
+    let query = `
+      SELECT 
+        o.*,
+        u."firstName",
+        u."lastName",
+        oi.id AS "orderItemId",
+        oi."bookId",
+        b.title AS "bookTitle",
+        oi.quantity,
+        oi."unitPrice"
+      FROM "Order" o
+      LEFT JOIN "User" u ON o."userId" = u.id
+      LEFT JOIN "OrderItem" oi ON o.id = oi."orderId"
+      LEFT JOIN "Book" b ON oi."bookId" = b.id
+    `;
 
     if (conditions.length > 0) {
       query += ` WHERE ${conditions.join(" AND ")}`;
     }
 
-    values.push(limitNumber);
-    values.push(offset);
+    query += ` ORDER BY o."createdAt" ${sortOrder} LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
 
-    query += `
-      ORDER BY o."createdAt" DESC
-      LIMIT $${values.length - 1}
-      OFFSET $${values.length}
-    `;
+    values.push(limit, offset);
 
     const result = await db.query(query, values);
 
+    // Map کردن سفارش‌ها با آیتم‌ها
     const ordersMap = {};
-
     for (const row of result.rows) {
       if (!ordersMap[row.id]) {
         ordersMap[row.id] = {
@@ -384,24 +389,22 @@ const getAdminOrders = async (req, res) => {
 
     const orders = Object.values(ordersMap);
 
-    // -------- Count Query --------
-    let countQuery = `SELECT COUNT(*) FROM "Order" o`;
+    // کوئری تعداد کل سفارش‌ها برای pagination
+    let countQuery = `SELECT COUNT(*) FROM "Order" o LEFT JOIN "User" u ON o."userId" = u.id`;
     if (conditions.length > 0) {
       countQuery += ` WHERE ${conditions.join(" AND ")}`;
     }
-
     const countResult = await db.query(
       countQuery,
       values.slice(0, values.length - 2),
     );
-
     const total = parseInt(countResult.rows[0].count, 10);
 
     res.status(200).json({
-      page: pageNumber,
-      limit: limitNumber,
+      page,
+      limit,
       total,
-      totalPages: Math.ceil(total / limitNumber),
+      totalPages: Math.ceil(total / limit),
       orders,
     });
   } catch (error) {
