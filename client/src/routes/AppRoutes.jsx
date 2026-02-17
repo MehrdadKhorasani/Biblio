@@ -18,6 +18,7 @@ import UserPanel from "../pages/dashboard/UserPanel";
 import Profile from "../pages/dashboard/Profile";
 import RoleRedirect from "../pages/dashboard/RoleRedirect";
 import AdminOrders from "../pages/dashboard/AdminOrders";
+import AdminOrderDetails from "../pages/dashboard/AdminOrderDetails";
 
 const AppRoutes = () => {
   return (
@@ -32,6 +33,8 @@ const AppRoutes = () => {
 
       {/* Private */}
       <Route element={<PrivateRoute />}>
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/order-success" element={<OrderSuccess />} />
         <Route path="/dashboard" element={<DashboardLayout />}>
           {/* Redirect بر اساس نقش */}
           <Route index element={<RoleRedirect />} />
@@ -47,6 +50,7 @@ const AppRoutes = () => {
           <Route element={<PrivateRoute allowedRoles={[2]} />}>
             <Route path="admin" element={<div>پنل ادمین</div>} />
             <Route path="admin/orders" element={<AdminOrders />} />
+            <Route path="admin/orders/:id" element={<AdminOrderDetails />} />
             <Route path="admin/books" element={<div>مدیریت کتاب‌ها</div>} />
           </Route>
 

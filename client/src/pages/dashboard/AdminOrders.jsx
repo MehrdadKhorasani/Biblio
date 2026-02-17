@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import { toPersianNumber } from "../../utils/toPersianNumbers";
 import { orderStatusToPersian } from "../../utils/orderStatusToPersian";
@@ -7,6 +8,8 @@ const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -30,26 +33,6 @@ const AdminOrders = () => {
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
-
-  const handleCancel = async (orderId) => {
-    try {
-      await api.patch(`/orders/${orderId}/cancel`);
-      fetchOrders();
-    } catch (err) {
-      console.error("خطا در لغو سفارش:", err);
-      alert("لغو سفارش ناموفق بود.");
-    }
-  };
-
-  const handlePay = async (orderId) => {
-    try {
-      await api.post(`/orders/${orderId}/pay`);
-      fetchOrders();
-    } catch (err) {
-      console.error("خطا در پرداخت سفارش:", err);
-      alert("علامت‌گذاری پرداخت ناموفق بود.");
-    }
-  };
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
@@ -82,7 +65,10 @@ const AdminOrders = () => {
       case "paid":
         return (
           <button
-            onClick={() => handleStatusChange(order.id, "shipped")}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleStatusChange(order.id, "shipped");
+            }}
             className="px-3 py-1.5 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-200"
           >
             ارسال سفارش
@@ -92,7 +78,10 @@ const AdminOrders = () => {
       case "shipped":
         return (
           <button
-            onClick={() => handleStatusChange(order.id, "delivered")}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleStatusChange(order.id, "delivered");
+            }}
             className="px-3 py-1.5 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700 transition duration-200"
           >
             تحویل شد
@@ -136,7 +125,13 @@ const AdminOrders = () => {
             </thead>
             <tbody>
               {orders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-50">
+                <tr
+                  key={order.id}
+                  className="hover:bg-gray-100 cursor-pointer transition"
+                  onClick={() =>
+                    navigate(`/dashboard/admin/orders/${order.id}`)
+                  }
+                >
                   <td className="py-2 px-4 border-b text-center">
                     {toPersianNumber(order.id)}
                   </td>
@@ -202,7 +197,10 @@ const StatusHistory = ({ orderId, fetchHistory }) => {
   return (
     <div className="flex flex-col items-center">
       <button
-        onClick={loadHistory}
+        onClick={(e) => {
+          e.stopPropagation();
+          loadHistory();
+        }}
         className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-2 py-1 rounded mb-1"
       >
         {show ? "پنهان کردن تاریخچه" : "نمایش تاریخچه"}

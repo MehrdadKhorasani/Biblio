@@ -26,20 +26,21 @@ const createOrder = async (req, res) => {
 
     await client.query("BEGIN");
 
+    // 1️⃣ محاسبه totalPrice و آماده سازی آیتم‌ها
     let totalPrice = 0;
     const preparedItems = [];
 
     for (const item of items) {
-      const bookResult = await client.query(
+      const { rows } = await client.query(
         `SELECT price, stock FROM "Book" WHERE id = $1`,
         [item.bookId],
       );
 
-      if (bookResult.rows.length === 0) {
+      if (rows.length === 0) {
         throw new Error(`Book with id ${item.bookId} not found`);
       }
 
-      const { price, stock } = bookResult.rows[0];
+      const { price, stock } = rows[0];
 
       if (stock < item.quantity) {
         throw new Error(`Insufficient stock for book id ${item.bookId}`);
@@ -54,45 +55,58 @@ const createOrder = async (req, res) => {
       });
     }
 
-    const order = await Order.create(
-      {
-        userId,
-        totalPrice,
-        note: note || null,
-        phone,
-        address,
-        city,
-        postalCode,
-      },
-      client,
-    );
+    // 2️⃣ ایجاد سفارش داخل تراکنش
+    const orderQuery = `
+      INSERT INTO "Order"
+      ("userId", "totalPrice", note, phone, address, city, "postalCode")
+      VALUES ($1,$2,$3,$4,$5,$6,$7)
+      RETURNING *;
+    `;
+    const orderValues = [
+      userId,
+      totalPrice,
+      note || null,
+      phone,
+      address,
+      city,
+      postalCode,
+    ];
+    const orderResult = await client.query(orderQuery, orderValues);
+    const order = orderResult.rows[0];
 
+    // 3️⃣ اضافه کردن آیتم‌ها با client همان تراکنش
     for (const item of preparedItems) {
-      await OrderItem.create(
-        {
-          orderId: order.id,
-          bookId: item.bookId,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-        },
-        client,
-      );
+      const itemQuery = `
+        INSERT INTO "OrderItem" ("orderId", "bookId", quantity, "unitPrice")
+        VALUES ($1,$2,$3,$4);
+      `;
+      await client.query(itemQuery, [
+        order.id,
+        item.bookId,
+        item.quantity,
+        item.unitPrice,
+      ]);
     }
 
+    // 4️⃣ کم کردن موجودی کتاب‌ها
     for (const item of preparedItems) {
-      const stockUpdateResult = await client.query(
-        `UPDATE "Book" 
-          SET stock = stock - $1,
+      const updateStock = `
+        UPDATE "Book"
+        SET stock = stock - $1,
             "updatedAt" = CURRENT_TIMESTAMP
-          WHERE id = $2 AND stock >= $1
-          RETURNING stock`,
-        [item.quantity, item.bookId],
-      );
+        WHERE id = $2 AND stock >= $1
+      `;
+      const stockResult = await client.query(updateStock, [
+        item.quantity,
+        item.bookId,
+      ]);
 
-      if (stockUpdateResult.rowCount === 0) {
+      if (stockResult.rowCount === 0) {
         throw new Error(`Not enough stock for book ${item.bookId}`);
       }
     }
+
+    // 5️⃣ COMMIT تراکنش
     await client.query("COMMIT");
 
     return res.status(201).json({
@@ -102,7 +116,7 @@ const createOrder = async (req, res) => {
   } catch (error) {
     await client.query("ROLLBACK");
     console.error("Error creating order:", error);
-    res.status(400).json({ message: error.message });
+    return res.status(400).json({ message: error.message });
   } finally {
     client.release();
   }
@@ -408,24 +422,70 @@ const getOrderStatusHistory = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
-
 const getOrderById = async (req, res) => {
   try {
     const orderId = req.params.id;
-    const userId = req.user.id;
 
-    const order = await Order.findById(orderId);
+    const query = `
+      SELECT 
+        o.*,
+        u."firstName",
+        u."lastName",
+        u.email,
+        oi.id as "orderItemId",
+        oi."bookId",
+        b.title AS "bookTitle",
+        oi.quantity,
+        oi."unitPrice"
+      FROM "Order" o
+      LEFT JOIN "User" u ON o."userId" = u.id
+      LEFT JOIN "OrderItem" oi ON o.id = oi."orderId"
+      LEFT JOIN "Book" b ON oi."bookId" = b.id
+      WHERE o.id = $1
+    `;
 
-    if (!order) {
+    const result = await db.query(query, [orderId]);
+
+    if (result.rows.length === 0) {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    if (order.userId !== userId && req.user.roleId === 1) {
-      return res.status(403).json({ message: "Access denied" });
-    }
+    const rows = result.rows;
 
-    const items = await OrderItem.findByOrderId(orderId);
-    order.items = items;
+    const order = {
+      id: rows[0].id,
+      userId: rows[0].userId,
+      status: rows[0].status,
+      totalPrice: rows[0].totalPrice,
+      note: rows[0].note,
+      phone: rows[0].phone,
+      address: rows[0].address,
+      city: rows[0].city,
+      postalCode: rows[0].postalCode,
+      createdAt: rows[0].createdAt,
+      updatedAt: rows[0].updatedAt,
+      user: {
+        id: rows[0].userId,
+        firstName: rows[0].firstName,
+        lastName: rows[0].lastName,
+        email: rows[0].email,
+      },
+      items: [],
+    };
+
+    for (const row of rows) {
+      if (row.orderItemId) {
+        order.items.push({
+          id: row.orderItemId,
+          quantity: row.quantity,
+          unitPrice: row.unitPrice,
+          book: {
+            id: row.bookId,
+            title: row.bookTitle,
+          },
+        });
+      }
+    }
 
     res.status(200).json({ order });
   } catch (error) {

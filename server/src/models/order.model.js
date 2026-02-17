@@ -201,6 +201,84 @@ const Order = {
 
     return Object.values(ordersMap);
   },
+
+  async findDetailedById(id) {
+    const query = `
+    SELECT 
+      o.id,
+      o.status,
+      o."totalPrice",
+      o.note,
+      o.phone,
+      o.address,
+      o.city,
+      o."postalCode",
+      o."createdAt",
+      o."updatedAt",
+
+      u.id as "userId",
+      u."firstName",
+      u."lastName",
+      u.email,
+
+      oi.id as "orderItemId",
+      oi.quantity,
+      oi."unitPrice",
+
+      b.id as "bookId",
+      b.title
+
+    FROM "Order" o
+    LEFT JOIN "User" u
+      ON u.id = o."userId"
+    LEFT JOIN "OrderItem" oi
+      ON oi."orderId" = o.id
+    LEFT JOIN "Book" b
+      ON b.id = oi."bookId"
+
+    WHERE o.id = $1
+  `;
+
+    const result = await db.query(query, [id]);
+
+    if (result.rows.length === 0) return null;
+
+    const order = {
+      id: result.rows[0].id,
+      status: result.rows[0].status,
+      totalPrice: result.rows[0].totalPrice,
+      note: result.rows[0].note,
+      phone: result.rows[0].phone,
+      address: result.rows[0].address,
+      city: result.rows[0].city,
+      postalCode: result.rows[0].postalCode,
+      createdAt: result.rows[0].createdAt,
+      updatedAt: result.rows[0].updatedAt,
+
+      user: {
+        id: result.rows[0].userId,
+        firstName: result.rows[0].firstName,
+        lastName: result.rows[0].lastName,
+        email: result.rows[0].email,
+      },
+
+      items: [],
+    };
+
+    for (const row of result.rows) {
+      if (row.orderItemId) {
+        order.items.push({
+          id: row.orderItemId,
+          bookId: row.bookId,
+          title: row.title,
+          quantity: row.quantity,
+          unitPrice: row.unitPrice,
+        });
+      }
+    }
+
+    return order;
+  },
 };
 
 module.exports = Order;

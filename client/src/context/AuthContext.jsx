@@ -1,6 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext, useEffect } from "react";
 import axios from "axios";
 
 const AuthContext = createContext(null);
@@ -22,59 +21,62 @@ const getInitialAuth = () => {
 
   if (token && user) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
     return {
       token,
       user,
     };
   }
-
-  return {
-    token: null,
-    user: null,
-  };
 };
 
 export const AuthProvider = ({ children }) => {
-  const initialAuth = getInitialAuth();
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [authLoading, setAuthLoading] = useState(false);
 
-  const [user, setUser] = useState(initialAuth.user);
-  const [token, setToken] = useState(initialAuth.token);
-  //  const [loading, setLoading] = useState(false);
-
-  const login = async (email, password) => {
-    const res = await axios.post("http://localhost:3000/api/auth/login", {
-      email,
-      password,
-    });
-
-    const { token, user } = res.data;
-
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
-
-    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
+  useEffect(() => {
+    const { token, user } = getInitialAuth();
     setToken(token);
     setUser(user);
+    setAuthLoading(false);
+  }, []);
+
+  const login = async (email, password) => {
+    setAuthLoading(true);
+    try {
+      const res = await axios.post("http://localhost:3000/api/auth/login", {
+        email,
+        password,
+      });
+      const { token, user } = res.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      setToken(token);
+      setUser(user);
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     delete axios.defaults.headers.common["Authorization"];
-
     setToken(null);
     setUser(null);
   };
 
-  const updateUser = (updatedUser) => {
-    setUser(updatedUser);
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-  };
-
   return (
     <AuthContext.Provider
-      value={{ user, token, login, logout, updateUser, setUser }}
+      value={{
+        user,
+        token,
+        login,
+        logout,
+        setUser,
+        authLoading,
+      }}
     >
       {children}
     </AuthContext.Provider>

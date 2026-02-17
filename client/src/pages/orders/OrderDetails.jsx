@@ -78,7 +78,7 @@ const OrderDetails = () => {
         <p>
           جمع کل:
           <span className="mr-2 font-bold">
-            {toPersianNumber(order.totalPrice)} تومان
+            {toPersianNumber(order.totalPrice ?? 0)} تومان
           </span>
         </p>
         {order.status === "pending" && (
@@ -117,7 +117,7 @@ const OrderDetails = () => {
                     <div>
                       <p className="font-bold">{item.title}</p>
                       <p className="text-sm text-gray-500">
-                        تعداد: {toPersianNumber(item.quantity)}
+                        تعداد: {toPersianNumber(item.quantity ?? 0)}
                       </p>
                     </div>
                   </div>
