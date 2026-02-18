@@ -30,3 +30,6 @@ app.use("/api/books", bookRoutes);
 
 const categoryRoutes = require("./src/routes/category.route");
 app.use("/api/categories", categoryRoutes);
+
+const dashboardRoutes = require("./src/routes/dashboard.route");
+app.use("/api/dashboard", dashboardRoutes);

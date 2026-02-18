@@ -31,4 +31,11 @@ router.get(
   orderController.getOrderStatusHistory,
 );
 
+router.get(
+  "/user/:id",
+  authenticate,
+  authorizeAdmin,
+  orderController.getOrdersByUserId,
+);
+
 module.exports = router;

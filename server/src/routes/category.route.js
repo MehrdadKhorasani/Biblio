@@ -4,7 +4,7 @@ const categoryController = require("../controllers/category.controller");
 const authenticate = require("../middlewares/auth.middleware");
 const authorizeAdmin = require("../middlewares/authorizeAdmin");
 
-router.get("/", categoryController.getCategories);
+router.get("/", categoryController.getCategoriesWithBookCount);
 
 router.post(
   "/",
@@ -14,10 +14,24 @@ router.post(
 );
 
 router.patch(
-  "/:id/toggle",
+  "/:id/status",
   authenticate,
   authorizeAdmin,
   categoryController.toggleCategory,
+);
+
+router.get(
+  "/all",
+  authenticate,
+  authorizeAdmin,
+  categoryController.getCategoriesWithBookCount,
+);
+
+router.put(
+  "/:id",
+  authenticate,
+  authorizeAdmin,
+  categoryController.updateCategory,
 );
 
 module.exports = router;

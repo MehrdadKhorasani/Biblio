@@ -1,40 +1,41 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { fetchBookById, updateBook } from "../../api/book.api";
+import { useNavigate } from "react-router-dom";
+import { createBook } from "../../api/book.api";
 import { fetchCategories } from "../../api/category.api";
 
-const EditBook = () => {
-  const { id } = useParams();
-  const numericId = Number(id);
+const AddBook = () => {
   const navigate = useNavigate();
 
-  const [book, setBook] = useState(null);
+  const [book, setBook] = useState({
+    title: "",
+    author: "",
+    translator: "",
+    publisher: "",
+    description: "",
+    ISBN: "",
+    price: 0,
+    stock: "",
+    coverImage: "",
+    categoryId: "",
+  });
+
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadCategories = async () => {
       try {
-        setLoading(true);
-
-        const [categoriesRes, bookRes] = await Promise.all([
-          fetchCategories(),
-          fetchBookById(numericId),
-        ]);
-        console.log("Categories response:", categoriesRes);
-
-        setCategories(categoriesRes.categories || []);
-        setBook(bookRes.book || bookRes); // اگر ساختار متفاوت بود اینو تنظیم می‌کنیم
+        const res = await fetchCategories();
+        setCategories(res.categories || []);
       } catch (err) {
-        console.error("Error loading edit data:", err);
+        console.error("Error fetching categories:", err);
       } finally {
         setLoading(false);
       }
     };
-
-    loadData();
-  }, [numericId]);
+    loadCategories();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,44 +48,38 @@ const EditBook = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-
     try {
-      const payload = {
-        title: book.title,
-        author: book.author,
-        translator: book.translator,
-        publisher: book.publisher,
-        description: book.description,
-        ISBN: book.ISBN,
-        price: book.price,
-        coverImage: book.coverImage,
-        categoryId: book.categoryId,
-      };
-
-      await updateBook(numericId, payload);
-
-      alert("کتاب با موفقیت ویرایش شد!");
+      await createBook(book);
+      alert("کتاب با موفقیت اضافه شد!");
       navigate("/dashboard/admin/books");
     } catch (err) {
-      console.error("Error updating book:", err);
-      alert("خطا در ویرایش کتاب");
+      console.error("Error creating book:", err);
+      alert("خطا در افزودن کتاب");
     } finally {
       setSaving(false);
     }
   };
 
   if (loading) return <div>در حال بارگذاری...</div>;
-  if (!book) return <div>کتاب پیدا نشد!</div>;
 
   return (
     <div className="max-w-2xl mx-auto p-4">
-      <h2 className="text-xl font-bold mb-4">ویرایش کتاب</h2>
+      <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+        <button
+          type="button"
+          onClick={() => navigate("/dashboard/admin/books")}
+        >
+          ← بازگشت به لیست کتاب‌ها
+        </button>
+      </div>
+
+      <h2 className="text-xl font-bold mb-4">افزودن کتاب جدید</h2>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <input
           type="text"
           name="title"
-          value={book.title || ""}
+          value={book.title}
           onChange={handleChange}
           placeholder="عنوان کتاب"
           className="border p-2 rounded"
@@ -94,7 +89,7 @@ const EditBook = () => {
         <input
           type="text"
           name="author"
-          value={book.author || ""}
+          value={book.author}
           onChange={handleChange}
           placeholder="نویسنده"
           className="border p-2 rounded"
@@ -104,7 +99,7 @@ const EditBook = () => {
         <input
           type="text"
           name="translator"
-          value={book.translator || ""}
+          value={book.translator}
           onChange={handleChange}
           placeholder="مترجم"
           className="border p-2 rounded"
@@ -113,7 +108,7 @@ const EditBook = () => {
         <input
           type="text"
           name="publisher"
-          value={book.publisher || ""}
+          value={book.publisher}
           onChange={handleChange}
           placeholder="ناشر"
           className="border p-2 rounded"
@@ -122,7 +117,7 @@ const EditBook = () => {
 
         <textarea
           name="description"
-          value={book.description || ""}
+          value={book.description}
           onChange={handleChange}
           placeholder="توضیحات"
           className="border p-2 rounded"
@@ -131,7 +126,7 @@ const EditBook = () => {
         <input
           type="text"
           name="ISBN"
-          value={book.ISBN || ""}
+          value={book.ISBN}
           onChange={handleChange}
           placeholder="ISBN"
           className="border p-2 rounded"
@@ -140,7 +135,7 @@ const EditBook = () => {
         <input
           type="number"
           name="price"
-          value={book.price || 0}
+          value={book.price}
           onChange={handleChange}
           placeholder="قیمت"
           className="border p-2 rounded"
@@ -148,9 +143,18 @@ const EditBook = () => {
         />
 
         <input
+          type="number"
+          name="stock"
+          value={book.stock}
+          onChange={handleChange}
+          placeholder="موجودی"
+          className="border p-2 rounded"
+        />
+
+        <input
           type="text"
           name="coverImage"
-          value={book.coverImage || ""}
+          value={book.coverImage}
           onChange={handleChange}
           placeholder="آدرس تصویر جلد"
           className="border p-2 rounded"
@@ -158,7 +162,7 @@ const EditBook = () => {
 
         <select
           name="categoryId"
-          value={book.categoryId || ""}
+          value={book.categoryId}
           onChange={handleChange}
           className="border p-2 rounded"
           required
@@ -174,13 +178,13 @@ const EditBook = () => {
         <button
           type="submit"
           disabled={saving}
-          className="bg-blue-500 text-white px-4 py-2 rounded mt-2"
+          className="bg-green-500 text-white px-4 py-2 rounded mt-2"
         >
-          {saving ? "در حال ذخیره..." : "ذخیره تغییرات"}
+          {saving ? "در حال ذخیره..." : "افزودن کتاب"}
         </button>
       </form>
     </div>
   );
 };
 
-export default EditBook;
+export default AddBook;

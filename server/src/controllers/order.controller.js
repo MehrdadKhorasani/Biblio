@@ -497,6 +497,23 @@ const getOrderById = async (req, res) => {
   }
 };
 
+const getOrdersByUserId = async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id); // id کاربر از URL
+    const orders = await Order.findByUserId(userId);
+
+    for (const order of orders) {
+      const items = await OrderItem.findByOrderId(order.id);
+      order.items = items;
+    }
+
+    res.status(200).json({ orders });
+  } catch (error) {
+    console.error("Error fetching user orders:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 module.exports = {
   getAllOrders,
   createOrder,
@@ -508,4 +525,5 @@ module.exports = {
   getAdminOrders,
   getOrderStatusHistory,
   getOrderById,
+  getOrdersByUserId,
 };

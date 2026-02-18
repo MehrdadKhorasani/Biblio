@@ -19,6 +19,13 @@ import AdminOrders from "../pages/dashboard/AdminOrders";
 import AdminOrderDetails from "../pages/dashboard/AdminOrderDetails";
 import AdminBooks from "../pages/dashboard/AdminBooks";
 import EditBook from "../pages/dashboard/EditBook";
+import AddBook from "../pages/dashboard/AddBook";
+import AdminUsers from "../pages/dashboard/AdminUsers";
+import UserOrders from "../pages/dashboard/UserOrders";
+import AdminCategories from "../pages/dashboard/AdminCategories";
+import NewCategory from "../pages/dashboard/NewCategory";
+import DashboardHome from "../pages/dashboard/DashboardHome";
+import AdminSettings from "../pages/dashboard/AdminSettings";
 
 const AppRoutes = () => {
   return (
@@ -38,6 +45,8 @@ const AppRoutes = () => {
 
         {/* Dashboard Layout wrapper */}
         <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route index element={<DashboardHome />} />
+
           {/* USER */}
           <Route element={<PrivateRoute allowedRoles={[1]} />}>
             <Route path="orders" element={<MyOrders />} />
@@ -51,6 +60,12 @@ const AppRoutes = () => {
             <Route path="admin/orders/:id" element={<AdminOrderDetails />} />
             <Route path="admin/books" element={<AdminBooks />} />
             <Route path="admin/books/edit/:id" element={<EditBook />} />
+            <Route path="admin/books/add" element={<AddBook />} />
+            <Route path="admin/users" element={<AdminUsers />} />
+            <Route path="admin/users/:id/orders" element={<UserOrders />} />
+            <Route path="admin/categories" element={<AdminCategories />} />
+            <Route path="admin/categories/new" element={<NewCategory />} />
+            <Route path="admin/settings" element={<AdminSettings />} />
           </Route>
         </Route>
       </Route>

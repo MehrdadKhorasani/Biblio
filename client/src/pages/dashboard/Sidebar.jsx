@@ -62,6 +62,30 @@ const Sidebar = () => {
                 مدیریت کتاب‌ها
               </Link>
             </li>
+            <li>
+              <Link
+                to="/dashboard/admin/users"
+                className="block hover:bg-gray-700 p-2 rounded"
+              >
+                مدیریت کاربران
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/dashboard/admin/categories"
+                className="block hover:bg-gray-700 p-2 rounded"
+              >
+                مدیریت دسته‌بندی‌ها
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/dashboard/admin/settings"
+                className="block hover:bg-gray-700 p-2 rounded"
+              >
+                تنظیمات حساب کاربری
+              </Link>
+            </li>
           </>
         )}
 

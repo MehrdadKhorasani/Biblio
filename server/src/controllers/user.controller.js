@@ -67,11 +67,9 @@ const updateMyProfile = async (req, res) => {
 
 const getAllUsersForAdmin = async (req, res) => {
   try {
-    const users = await User.findAllForAdmin();
-
-    res.status(200).json({
-      users,
-    });
+    const search = req.query.search || "";
+    const users = await User.findAllForAdmin(search); // ✅ فقط رشته
+    res.status(200).json({ users });
   } catch (error) {
     console.error("Error fetching users for admin:", error);
     res.status(500).json({ message: "Server Error" });

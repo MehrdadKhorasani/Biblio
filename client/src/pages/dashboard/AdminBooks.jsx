@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import {
   fetchBooks,
@@ -87,7 +88,16 @@ const AdminBooks = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4">مدیریت کتاب‌ها</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">مدیریت کتاب‌ها</h2>
+
+        <Link
+          to="/dashboard/admin/books/add"
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        >
+          افزودن کتاب
+        </Link>
+      </div>
 
       {/* فیلتر و جستجو */}
       <div className="flex gap-2 mb-4 flex-wrap">

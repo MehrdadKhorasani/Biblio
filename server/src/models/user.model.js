@@ -94,8 +94,8 @@ const User = {
     }));
   },
 
-  async findAllForAdmin() {
-    const query = `
+  async findAllForAdmin(search) {
+    let query = `
     SELECT
       id,
       "firstName",
@@ -106,10 +106,22 @@ const User = {
       "createdAt",
       "updatedAt"
     FROM "User"
-    ORDER BY id ASC
+    WHERE "roleId" = 1
   `;
+    const values = [];
 
-    const result = await db.query(query);
+    if (typeof search === "string" && search.trim() !== "") {
+      values.push(`%${search.trim()}%`);
+      query += `
+      AND (
+        LOWER("firstName" || ' ' || "lastName") LIKE LOWER($${values.length})
+      )
+    `;
+    }
+
+    query += ` ORDER BY id ASC`;
+
+    const result = await db.query(query, values);
     return result.rows;
   },
 
