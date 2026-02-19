@@ -26,7 +26,6 @@ const createOrder = async (req, res) => {
 
     await client.query("BEGIN");
 
-    // 1️⃣ محاسبه totalPrice و آماده سازی آیتم‌ها
     let totalPrice = 0;
     const preparedItems = [];
 
@@ -55,7 +54,6 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // 2️⃣ ایجاد سفارش داخل تراکنش
     const orderQuery = `
       INSERT INTO "Order"
       ("userId", "totalPrice", note, phone, address, city, "postalCode")
@@ -71,10 +69,10 @@ const createOrder = async (req, res) => {
       city,
       postalCode,
     ];
+
     const orderResult = await client.query(orderQuery, orderValues);
     const order = orderResult.rows[0];
 
-    // 3️⃣ اضافه کردن آیتم‌ها با client همان تراکنش
     for (const item of preparedItems) {
       const itemQuery = `
         INSERT INTO "OrderItem" ("orderId", "bookId", quantity, "unitPrice")
@@ -88,7 +86,6 @@ const createOrder = async (req, res) => {
       ]);
     }
 
-    // 4️⃣ کم کردن موجودی کتاب‌ها
     for (const item of preparedItems) {
       const updateStock = `
         UPDATE "Book"
@@ -106,7 +103,13 @@ const createOrder = async (req, res) => {
       }
     }
 
-    // 5️⃣ COMMIT تراکنش
+    await client.query(
+      `INSERT INTO "OrderStatusHistory"
+      ("orderId", "oldStatus", "newStatus", "changedBy")
+      VALUES ($1, $2, $3, $4)`,
+      [order.id, "none", "pending", userId],
+    );
+
     await client.query("COMMIT");
 
     return res.status(201).json({
@@ -115,7 +118,6 @@ const createOrder = async (req, res) => {
     });
   } catch (error) {
     await client.query("ROLLBACK");
-    console.error("Error creating order:", error);
     return res.status(400).json({ message: error.message });
   } finally {
     client.release();
@@ -145,6 +147,7 @@ const cancelOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
     const userId = req.user.id;
+
     await client.query("BEGIN");
 
     const orderResult = await client.query(
@@ -178,6 +181,14 @@ const cancelOrder = async (req, res) => {
     }
 
     await client.query(
+      `INSERT INTO "OrderStatusHistory"
+      ("orderId", "oldStatus", "newStatus", "changedBy")
+      VALUES ($1,$2,$3,$4)
+      `,
+      [orderId, order.status, "cancelled", userId],
+    );
+
+    await client.query(
       `UPDATE "Order" 
           SET status = 'cancelled',
             "updatedAt" = CURRENT_TIMESTAMP
@@ -189,7 +200,6 @@ const cancelOrder = async (req, res) => {
     res.status(200).json({ message: "Order cancelled successfully" });
   } catch (error) {
     await client.query("ROLLBACK");
-    console.error("Error cancelling order:", error);
     res.status(400).json({ message: error.message });
   } finally {
     client.release();
@@ -277,14 +287,14 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
+    const updatedOrder = await Order.updateStatus(orderId, status, adminId);
+
     await OrderStatusHistory.create({
       orderId,
       oldStatus: order.status,
       newStatus: status,
       changedBy: adminId,
     });
-
-    const updatedOrder = await Order.updateStatus(orderId, status, adminId);
 
     res.status(200).json({
       message: "Order status updated successfully",

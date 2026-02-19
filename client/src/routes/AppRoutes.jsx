@@ -55,7 +55,7 @@ const AppRoutes = () => {
           </Route>
 
           {/* ADMIN */}
-          <Route element={<PrivateRoute allowedRoles={[2]} />}>
+          <Route element={<PrivateRoute allowedRoles={[2, 3]} />}>
             <Route path="admin/orders" element={<AdminOrders />} />
             <Route path="admin/orders/:id" element={<AdminOrderDetails />} />
             <Route path="admin/books" element={<AdminBooks />} />

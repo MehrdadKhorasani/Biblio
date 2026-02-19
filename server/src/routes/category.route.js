@@ -1,36 +1,36 @@
 const express = require("express");
 const router = express.Router();
 const categoryController = require("../controllers/category.controller");
-const authenticate = require("../middlewares/auth.middleware");
-const authorizeAdmin = require("../middlewares/authorizeAdmin");
+const authenticate = require("../middlewares/authenticate.middleware");
+const { authorize, ROLES } = require("../middlewares/authorize.middleware");
 
 router.get("/", categoryController.getCategoriesWithBookCount);
 
 router.post(
   "/",
   authenticate,
-  authorizeAdmin,
+  authorize([ROLES.ADMIN, ROLES.MANAGER]),
   categoryController.createCategory,
 );
 
 router.patch(
   "/:id/status",
   authenticate,
-  authorizeAdmin,
+  authorize([ROLES.ADMIN, ROLES.MANAGER]),
   categoryController.toggleCategory,
 );
 
 router.get(
   "/all",
   authenticate,
-  authorizeAdmin,
+  authorize([ROLES.ADMIN, ROLES.MANAGER]),
   categoryController.getCategoriesWithBookCount,
 );
 
 router.put(
   "/:id",
   authenticate,
-  authorizeAdmin,
+  authorize([ROLES.ADMIN, ROLES.MANAGER]),
   categoryController.updateCategory,
 );
 

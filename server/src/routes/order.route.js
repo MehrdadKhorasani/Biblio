@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const orderController = require("../controllers/order.controller");
-const authenticate = require("../middlewares/auth.middleware");
-const authorizeAdmin = require("../middlewares/authorizeAdmin");
+const authenticate = require("../middlewares/authenticate.middleware");
+const { authorize, ROLES } = require("../middlewares/authorize.middleware");
 
 router.get(
   "/admin",
   authenticate,
-  authorizeAdmin,
+  authorize([ROLES.ADMIN, ROLES.MANAGER]),
   orderController.getAdminOrders,
 );
 
@@ -20,21 +20,21 @@ router.post("/:id/pay", authenticate, orderController.payOrder);
 router.patch(
   "/:id/status",
   authenticate,
-  authorizeAdmin,
+  authorize([ROLES.ADMIN, ROLES.MANAGER]),
   orderController.updateOrderStatus,
 );
 
 router.get(
   "/:id/history",
   authenticate,
-  authorizeAdmin,
+  authorize([ROLES.ADMIN, ROLES.MANAGER]),
   orderController.getOrderStatusHistory,
 );
 
 router.get(
   "/user/:id",
   authenticate,
-  authorizeAdmin,
+  authorize([ROLES.ADMIN, ROLES.MANAGER]),
   orderController.getOrdersByUserId,
 );
 

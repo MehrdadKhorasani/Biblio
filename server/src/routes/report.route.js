@@ -1,14 +1,16 @@
 const express = require("express");
 const router = express.Router();
-const { getAdminStats } = require("../controllers/dashboard.controller");
+
 const authenticate = require("../middlewares/authenticate.middleware");
 const { authorize, ROLES } = require("../middlewares/authorize.middleware");
 
+const { getOrderStatusReport } = require("../controllers/report.controller");
+
 router.get(
-  "/stats",
+  "/order-status",
   authenticate,
-  authorize([ROLES.ADMIN, ROLES.MANAGER]),
-  getAdminStats,
+  authorize([ROLES.MANAGER]),
+  getOrderStatusReport,
 );
 
 module.exports = router;

@@ -33,3 +33,6 @@ app.use("/api/categories", categoryRoutes);
 
 const dashboardRoutes = require("./src/routes/dashboard.route");
 app.use("/api/dashboard", dashboardRoutes);
+
+const reportRoutes = require("./src/routes/report.route");
+app.use("/api/reports", reportRoutes);

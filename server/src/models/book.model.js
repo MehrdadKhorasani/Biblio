@@ -292,32 +292,6 @@ const Book = {
   async softDelete(id) {
     const query = `
       UPDATE "Book"
-      SET "isDeleted" = true,
-          "deletedAt" = CURRENT_TIMESTAMP,
-          "updatedAt" = CURRENT_TIMESTAMP
-      WHERE id = $1 AND "isDeleted" = false
-      RETURNING *;
-    `;
-    const result = await db.query(query, [id]);
-    return result.rows[0];
-  },
-
-  async restore(id) {
-    const query = `
-    UPDATE "Book"
-    SET "isDeleted" = false,
-        "deletedAt" = NULL,
-        "updatedAt" = CURRENT_TIMESTAMP
-    WHERE id = $1 AND "isDeleted" = true
-    RETURNING *;
-  `;
-    const result = await db.query(query, [id]);
-    return result.rows[0];
-  },
-
-  async softDelete(id) {
-    const query = `
-      UPDATE "Book"
       SET
         "isDeleted" = true,
         "deletedAt" = CURRENT_TIMESTAMP,

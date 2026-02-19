@@ -44,7 +44,7 @@ const Sidebar = () => {
         )}
 
         {/* ADMIN */}
-        {user.roleId === 2 && (
+        {(user.roleId === 2 || user.roleId === 3) && (
           <>
             <li>
               <Link
@@ -92,14 +92,67 @@ const Sidebar = () => {
         {/* MANAGER */}
         {user.roleId === 3 && (
           <>
-            <li className="hover:bg-gray-700 p-2 rounded cursor-pointer">
-              گزارش‌ها
+            {/* مدیریت ادمین‌ها */}
+            <li>
+              <Link
+                to="/dashboard/manager/admins"
+                className="block hover:bg-gray-700 p-2 rounded"
+              >
+                مدیریت ادمین‌ها
+              </Link>
             </li>
-            <li className="hover:bg-gray-700 p-2 rounded cursor-pointer">
-              مدیریت کاربران
+
+            {/* گزارش‌ها با زیرمجموعه */}
+            <li>
+              <details className="group">
+                <summary className="cursor-pointer hover:bg-gray-700 p-2 rounded">
+                  گزارش‌ها
+                </summary>
+                <ul className="pl-4 mt-1 space-y-1">
+                  <li>
+                    <Link
+                      to="/dashboard/manager/reports/orders"
+                      className="block hover:bg-gray-700 p-2 rounded"
+                    >
+                      گزارش وضعیت سفارش‌ها
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/dashboard/manager/reports/inventory"
+                      className="block hover:bg-gray-700 p-2 rounded"
+                    >
+                      گزارش وضعیت موجودی
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/dashboard/manager/reports/user-activity"
+                      className="block hover:bg-gray-700 p-2 rounded"
+                    >
+                      گزارش فعالیت‌های کاربران
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/dashboard/manager/reports/sales"
+                      className="block hover:bg-gray-700 p-2 rounded"
+                    >
+                      گزارش فروش
+                    </Link>
+                  </li>
+                </ul>
+              </details>
             </li>
-            <li className="hover:bg-gray-700 p-2 rounded cursor-pointer">
-              همه سفارش‌ها
+
+            {/* تغییر رمز کاربران */}
+            <li>
+              <Link
+                to="/dashboard/manager/change-password"
+                className="block hover:bg-gray-700 p-2 rounded"
+              >
+                تغییر رمز کاربران
+              </Link>
             </li>
           </>
         )}

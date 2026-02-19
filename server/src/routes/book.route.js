@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router();
 
 const bookController = require("../controllers/book.controller");
-const authenticate = require("../middlewares/auth.middleware");
-const authorizeAdmin = require("../middlewares/authorizeAdmin");
+const authenticate = require("../middlewares/authenticate.middleware");
+const { authorize, ROLES } = require("../middlewares/authorize.middleware");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 
@@ -36,41 +36,51 @@ router.get("/:id", optionalAuthenticate, bookController.getBookById);
 // --------------------
 // Admin routes
 // --------------------
-router.post("/", authenticate, authorizeAdmin, bookController.createBook);
-router.patch("/:id", authenticate, authorizeAdmin, bookController.updateBook);
+router.post(
+  "/",
+  authenticate,
+  authorize([ROLES.ADMIN, ROLES.MANAGER]),
+  bookController.createBook,
+);
+router.patch(
+  "/:id",
+  authenticate,
+  authorize([ROLES.ADMIN, ROLES.MANAGER]),
+  bookController.updateBook,
+);
 
 router.patch(
   "/:id/availability",
   authenticate,
-  authorizeAdmin,
+  authorize([ROLES.ADMIN, ROLES.MANAGER]),
   bookController.toggleBookAvailability,
 );
 
 router.patch(
   "/:id/stock",
   authenticate,
-  authorizeAdmin,
+  authorize([ROLES.ADMIN, ROLES.MANAGER]),
   bookController.updateBookStock,
 );
 
 router.get(
   "/:id/stock-history",
   authenticate,
-  authorizeAdmin,
+  authorize([ROLES.ADMIN, ROLES.MANAGER]),
   bookController.getBookStockHistory,
 );
 
 router.delete(
   "/:id",
   authenticate,
-  authorizeAdmin,
+  authorize([ROLES.ADMIN, ROLES.MANAGER]),
   bookController.softDeleteBook,
 );
 
 router.patch(
   "/:id/restore",
   authenticate,
-  authorizeAdmin,
+  authorize([ROLES.ADMIN, ROLES.MANAGER]),
   bookController.restoreBook,
 );
 

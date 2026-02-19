@@ -41,6 +41,39 @@ const OrderStatusHistory = {
           : "سیستم",
     }));
   },
+
+  async findAll({ page = 1, limit = 20 }) {
+    const offset = (page - 1) * limit;
+
+    const query = `
+    SELECT
+      osh.id,
+      osh."orderId",
+      osh."oldStatus",
+      osh."newStatus",
+      osh."createdAt",
+      u."firstName",
+      u."lastName"
+    FROM "OrderStatusHistory" osh
+    LEFT JOIN "User" u ON u.id = osh."changedBy"
+    ORDER BY osh."createdAt" DESC
+    LIMIT $1 OFFSET $2;
+  `;
+
+    const result = await db.query(query, [limit, offset]);
+
+    return result.rows.map((row) => ({
+      id: row.id,
+      orderId: row.orderId,
+      oldStatus: row.oldStatus,
+      newStatus: row.newStatus,
+      createdAt: row.createdAt,
+      changedBy:
+        row.firstName && row.lastName
+          ? `${row.firstName} ${row.lastName}`
+          : "سیستم",
+    }));
+  },
 };
 
 module.exports = OrderStatusHistory;
