@@ -10,6 +10,11 @@ const {
   getBookStockReport,
 } = require("../controllers/report.controller");
 
+const {
+  getSalesSummary,
+  getDailySales,
+} = require("../controllers/salesReport.controller");
+
 router.get(
   "/order-status",
   authenticate,
@@ -29,6 +34,20 @@ router.get(
   authenticate,
   authorize([ROLES.MANAGER]),
   getUserActivityReport,
+);
+
+router.get(
+  "/sales/summary",
+  authenticate,
+  authorize([ROLES.MANAGER]),
+  getSalesSummary,
+);
+
+router.get(
+  "/sales/daily",
+  authenticate,
+  authorize([ROLES.MANAGER]),
+  getDailySales,
 );
 
 module.exports = router;
