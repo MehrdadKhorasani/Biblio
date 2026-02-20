@@ -31,6 +31,8 @@ import OrderStatusReport from "../pages/dashboard/manager/OrderStatusReport";
 import BookStockReport from "../pages/dashboard/manager/BookStockReport";
 import UserActivityReport from "../pages/dashboard/manager/UserActivitiesReport";
 import SalesReport from "../pages/dashboard/manager/SalesReport";
+import ManageAdmins from "../pages/dashboard/manager/ManageAdmins";
+import CreateAdmin from "../pages/dashboard/manager/CreateAdmin";
 
 const AppRoutes = () => {
   return (
@@ -74,6 +76,8 @@ const AppRoutes = () => {
           </Route>
 
           {/* Manager */}
+          <Route path="manager/admins" element={<ManageAdmins />} />
+          <Route path="manager/admins/new" element={<CreateAdmin />} />
           <Route path="manager/order-status" element={<OrderStatusReport />} />
           <Route
             path="manager/reports/inventory"

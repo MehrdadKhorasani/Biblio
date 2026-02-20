@@ -62,6 +62,20 @@ router.get(
   userController.getUserActivityLogs,
 );
 
+router.get(
+  "/manager/admins",
+  authenticate,
+  authorize([ROLES.MANAGER]),
+  userController.getAllAdminsForManager,
+);
+
+router.post(
+  "/manager/admins",
+  authenticate,
+  authorize([ROLES.MANAGER]),
+  userController.createAdmin,
+);
+
 /* ======================
    COMMON (Authenticated)
 ====================== */

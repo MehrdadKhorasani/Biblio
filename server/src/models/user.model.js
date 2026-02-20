@@ -62,18 +62,6 @@ const User = {
     const result = await db.query(query, [id]);
     if (!result.rows.length) return null;
     return result.rows[0];
-    //const row = result.rows[0];
-    /*return {
-      id: row.id,
-      firstName: row.firstName,
-      lastName: row.lastName,
-      email: row.email,
-      passwordHash: row.passwordHash,
-      roleId: row.roleId,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-    };
-  */
   },
 
   async findAll() {
@@ -107,6 +95,37 @@ const User = {
       "updatedAt"
     FROM "User"
     WHERE "roleId" = 1
+  `;
+    const values = [];
+
+    if (typeof search === "string" && search.trim() !== "") {
+      values.push(`%${search.trim()}%`);
+      query += `
+      AND (
+        LOWER("firstName" || ' ' || "lastName") LIKE LOWER($${values.length})
+      )
+    `;
+    }
+
+    query += ` ORDER BY id ASC`;
+
+    const result = await db.query(query, values);
+    return result.rows;
+  },
+
+  async findAllAdmins(search) {
+    let query = `
+    SELECT
+      id,
+      "firstName",
+      "lastName",
+      email,
+      "roleId",
+      "isActive",
+      "createdAt",
+      "updatedAt"
+    FROM "User"
+    WHERE "roleId" = 2
   `;
     const values = [];
 

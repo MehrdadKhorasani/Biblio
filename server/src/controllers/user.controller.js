@@ -325,6 +325,67 @@ const changeMyPassword = async (req, res) => {
   }
 };
 
+const getAllAdminsForManager = async (req, res) => {
+  try {
+    const search = req.query.search || "";
+    const admins = await User.findAllAdmins(search);
+    res.status(200).json({ users: admins });
+  } catch (error) {
+    console.error("Error fetching admins:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+const createAdmin = async (req, res) => {
+  try {
+    const managerId = req.user.id;
+    const { firstName, lastName, email, password } = req.body;
+
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({ message: "تمام فیلدها الزامی است." });
+    }
+
+    const existingUser = await User.findByEmail(email);
+    if (existingUser) {
+      return res.status(400).json({ message: "این ایمیل قبلاً ثبت شده." });
+    }
+
+    // هش کردن رمز عبور
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // roleId برای ادمین همیشه 2
+    const newAdmin = await User.create({
+      firstName,
+      lastName,
+      email,
+      passwordHash: hashedPassword,
+      roleId: ROLES.ADMIN,
+    });
+
+    // ثبت لاگ
+    await UserActivityLog.create({
+      actorId: managerId,
+      targetUserId: newAdmin.id,
+      action: "CREATE_ADMIN",
+      details: { firstName, lastName, email },
+    });
+
+    res.status(201).json({
+      message: "ادمین با موفقیت ایجاد شد",
+      user: {
+        id: newAdmin.id,
+        firstName: newAdmin.firstName,
+        lastName: newAdmin.lastName,
+        email: newAdmin.email,
+        roleId: newAdmin.roleId,
+      },
+    });
+  } catch (error) {
+    console.error("Error creating admin:", error);
+    res.status(500).json({ message: "خطا در سرور. دوباره تلاش کنید." });
+  }
+};
+
 module.exports = {
   getAllUsersForAdmin,
   toggleUserStatus,
@@ -336,4 +397,6 @@ module.exports = {
   toggleUserActive,
   getAllUsersForManager,
   getUserActivityLogs,
+  getAllAdminsForManager,
+  createAdmin,
 };
