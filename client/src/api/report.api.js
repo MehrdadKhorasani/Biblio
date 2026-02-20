@@ -28,3 +28,13 @@ export const fetchUserActivityReport = async ({
   });
   return res.data.logs; // یا res.data، بسته به response backend
 };
+
+export const fetchSalesSummary = async () => {
+  const res = await api.get("/reports/sales/summary");
+  return res.data;
+};
+
+export const fetchDailySales = async () => {
+  const res = await api.get("/reports/sales/daily");
+  return res.data;
+};

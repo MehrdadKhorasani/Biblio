@@ -30,6 +30,7 @@ import AdminSettings from "../pages/dashboard/AdminSettings";
 import OrderStatusReport from "../pages/dashboard/manager/OrderStatusReport";
 import BookStockReport from "../pages/dashboard/manager/BookStockReport";
 import UserActivityReport from "../pages/dashboard/manager/UserActivitiesReport";
+import SalesReport from "../pages/dashboard/manager/SalesReport";
 
 const AppRoutes = () => {
   return (
@@ -82,6 +83,7 @@ const AppRoutes = () => {
             path="manager/reports/user-activities"
             element={<UserActivityReport />}
           />
+          <Route path="manager/reports/sales" element={<SalesReport />} />
         </Route>
       </Route>
 
