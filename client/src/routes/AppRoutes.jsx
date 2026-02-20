@@ -29,6 +29,7 @@ import AdminSettings from "../pages/dashboard/AdminSettings";
 
 import OrderStatusReport from "../pages/dashboard/manager/OrderStatusReport";
 import BookStockReport from "../pages/dashboard/manager/BookStockReport";
+import UserActivityReport from "../pages/dashboard/manager/UserActivitiesReport";
 
 const AppRoutes = () => {
   return (
@@ -76,6 +77,10 @@ const AppRoutes = () => {
           <Route
             path="manager/reports/inventory"
             element={<BookStockReport />}
+          />
+          <Route
+            path="manager/reports/user-activities"
+            element={<UserActivityReport />}
           />
         </Route>
       </Route>

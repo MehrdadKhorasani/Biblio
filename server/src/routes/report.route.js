@@ -5,6 +5,7 @@ const authenticate = require("../middlewares/authenticate.middleware");
 const { authorize, ROLES } = require("../middlewares/authorize.middleware");
 
 const {
+  getUserActivityReport,
   getOrderStatusReport,
   getBookStockReport,
 } = require("../controllers/report.controller");
@@ -21,6 +22,13 @@ router.get(
   authenticate,
   authorize([ROLES.MANAGER]),
   getBookStockReport,
+);
+
+router.get(
+  "/user-activities",
+  authenticate,
+  authorize([ROLES.MANAGER]),
+  getUserActivityReport,
 );
 
 module.exports = router;

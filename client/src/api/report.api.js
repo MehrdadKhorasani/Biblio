@@ -16,3 +16,15 @@ export const fetchBookStockReport = async ({
   });
   return res.data.report;
 };
+
+export const fetchUserActivityReport = async ({
+  actorId,
+  targetUserId,
+  page = 1,
+  limit = 10,
+}) => {
+  const res = await api.get("/reports/user-activities", {
+    params: { actorId, targetUserId, page, limit },
+  });
+  return res.data.logs; // یا res.data، بسته به response backend
+};

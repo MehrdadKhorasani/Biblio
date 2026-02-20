@@ -127,7 +127,7 @@ const Sidebar = () => {
                   </li>
                   <li>
                     <Link
-                      to="/dashboard/manager/reports/user-activity"
+                      to="/dashboard/manager/reports/user-activities"
                       className="block hover:bg-gray-700 p-2 rounded"
                     >
                       گزارش فعالیت‌های کاربران
