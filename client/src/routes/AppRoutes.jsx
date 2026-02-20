@@ -28,6 +28,8 @@ import DashboardHome from "../pages/dashboard/DashboardHome";
 import AdminSettings from "../pages/dashboard/AdminSettings";
 
 import OrderStatusReport from "../pages/dashboard/manager/OrderStatusReport";
+import BookStockReport from "../pages/dashboard/manager/BookStockReport";
+
 const AppRoutes = () => {
   return (
     <Routes>
@@ -71,6 +73,10 @@ const AppRoutes = () => {
 
           {/* Manager */}
           <Route path="manager/order-status" element={<OrderStatusReport />} />
+          <Route
+            path="manager/reports/inventory"
+            element={<BookStockReport />}
+          />
         </Route>
       </Route>
 

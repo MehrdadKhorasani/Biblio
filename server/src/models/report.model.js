@@ -66,6 +66,66 @@ const Report = {
         : "سیستم",
     }));
   },
+
+  async getBookStockReport({ bookId, page = 1, limit = 10 }) {
+    const offset = (page - 1) * limit;
+
+    const conditions = [];
+    const values = [];
+
+    if (bookId) {
+      values.push(bookId);
+      conditions.push(`bsl."bookId" = $${values.length}`);
+    }
+
+    let query = `
+    SELECT
+      bsl.id,
+      bsl."bookId",
+      bsl.action,
+      bsl.oldstock,
+      bsl.newstock,
+      bsl.note,
+      bsl."createdAt",
+
+      b.title AS "bookTitle",
+
+      actor."firstName" AS "actorFirstName",
+      actor."lastName" AS "actorLastName"
+
+    FROM "BookStockLog" bsl
+    LEFT JOIN "Book" b ON b.id = bsl."bookId"
+    LEFT JOIN "User" actor ON actor.id = bsl."actorId"
+  `;
+
+    if (conditions.length > 0) {
+      query += ` WHERE ${conditions.join(" AND ")}`;
+    }
+
+    query += `
+    ORDER BY bsl."createdAt" DESC
+    LIMIT $${values.length + 1}
+    OFFSET $${values.length + 2}
+  `;
+
+    values.push(limit, offset);
+
+    const result = await db.query(query, values);
+
+    return result.rows.map((row) => ({
+      id: row.id,
+      bookId: row.bookId,
+      bookTitle: row.bookTitle,
+      action: row.action,
+      oldStock: row.oldstock,
+      newStock: row.newstock,
+      note: row.note,
+      createdAt: row.createdAt,
+      actorName: row.actorFirstName
+        ? `${row.actorFirstName} ${row.actorLastName}`
+        : "سیستم",
+    }));
+  },
 };
 
 module.exports = Report;

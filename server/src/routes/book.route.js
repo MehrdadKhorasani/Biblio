@@ -21,7 +21,6 @@ const optionalAuthenticate = async (req, res, next) => {
     }
   } catch (err) {
     console.log("Optional auth failed:", err.message);
-    // خطا رو نادیده می‌گیریم چون middleware اختیاریه
   }
 
   next();

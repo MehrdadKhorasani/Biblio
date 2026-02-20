@@ -227,7 +227,7 @@ const Book = {
     const allowedSortFields = ["price", "createdAt"];
 
     const sortField = allowedSortFields.includes(filters.sortBy)
-      ? filters.sort
+      ? filters.sortBy
       : "createdAt";
 
     const sortOrder =

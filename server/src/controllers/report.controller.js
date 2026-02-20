@@ -21,6 +21,27 @@ const getOrderStatusReport = async (req, res) => {
   }
 };
 
+const getBookStockReport = async (req, res) => {
+  try {
+    let { bookId, page = 1, limit = 10 } = req.query;
+
+    page = Number(page);
+    limit = Number(limit);
+
+    const report = await Report.getBookStockReport({
+      bookId,
+      page,
+      limit,
+    });
+
+    res.status(200).json({ report });
+  } catch (error) {
+    console.error("Error fetching book stock report:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 module.exports = {
   getOrderStatusReport,
+  getBookStockReport,
 };

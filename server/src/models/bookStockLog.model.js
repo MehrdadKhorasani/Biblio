@@ -4,8 +4,8 @@ const BookStockLog = {
   async create(log) {
     const query = `
       INSERT INTO "BookStockLog"
-      ("bookId", "actorId", action, "oldStock", "newStock", note)
-      VALUES ($1,$2,$3,$4,$5,$6)
+      ("bookId", "actorId", action, oldstock, newstock, note)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *;
     `;
 
