@@ -7,7 +7,6 @@ const Report = {
     const conditions = [];
     const values = [];
 
-    // 🔍 فیلتر نام کاربر سفارش‌دهنده
     if (userName) {
       values.push(`%${userName}%`);
       conditions.push(
@@ -15,7 +14,6 @@ const Report = {
       );
     }
 
-    // 🔍 فیلتر بر اساس وضعیت فعلی
     if (status) {
       values.push(status);
       conditions.push(`osh."newStatus" = $${values.length}`);
@@ -37,8 +35,8 @@ const Report = {
         actor."lastName" AS "actorLastName"
 
       FROM "OrderStatusHistory" osh
-      JOIN "Order" o ON o.id = osh."orderId"
-      JOIN "User" customer ON customer.id = o."userId"
+      LEFT JOIN "Order" o ON o.id = osh."orderId"
+      LEFT JOIN "User" customer ON customer.id = o."userId"
       LEFT JOIN "User" actor ON actor.id = osh."changedBy"
     `;
 

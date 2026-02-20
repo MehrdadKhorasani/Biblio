@@ -27,6 +27,7 @@ import NewCategory from "../pages/dashboard/NewCategory";
 import DashboardHome from "../pages/dashboard/DashboardHome";
 import AdminSettings from "../pages/dashboard/AdminSettings";
 
+import OrderStatusReport from "../pages/dashboard/manager/OrderStatusReport";
 const AppRoutes = () => {
   return (
     <Routes>
@@ -67,6 +68,9 @@ const AppRoutes = () => {
             <Route path="admin/categories/new" element={<NewCategory />} />
             <Route path="admin/settings" element={<AdminSettings />} />
           </Route>
+
+          {/* Manager */}
+          <Route path="manager/order-status" element={<OrderStatusReport />} />
         </Route>
       </Route>
 

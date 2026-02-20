@@ -111,7 +111,7 @@ const Sidebar = () => {
                 <ul className="pl-4 mt-1 space-y-1">
                   <li>
                     <Link
-                      to="/dashboard/manager/reports/orders"
+                      to="/dashboard/manager/order-status"
                       className="block hover:bg-gray-700 p-2 rounded"
                     >
                       گزارش وضعیت سفارش‌ها
