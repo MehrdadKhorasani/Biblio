@@ -82,6 +82,37 @@ const User = {
     }));
   },
 
+  async findAllForManager(search) {
+    let query = `
+    SELECT
+      id,
+      "firstName",
+      "lastName",
+      email,
+      "roleId",
+      "isActive",
+      "createdAt",
+      "updatedAt"
+    FROM "User"
+    WHERE "roleId" IN (1, 2)
+  `;
+    const values = [];
+
+    if (typeof search === "string" && search.trim() !== "") {
+      values.push(`%${search.trim()}%`);
+      query += `
+      AND (
+        LOWER("firstName" || ' ' || "lastName") LIKE LOWER($${values.length})
+      )
+    `;
+    }
+
+    query += ` ORDER BY id ASC`;
+
+    const result = await db.query(query, values);
+    return result.rows;
+  },
+
   async findAllForAdmin(search) {
     let query = `
     SELECT

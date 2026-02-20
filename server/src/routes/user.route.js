@@ -76,6 +76,13 @@ router.post(
   userController.createAdmin,
 );
 
+router.patch(
+  "/manager/users/:id/password",
+  authenticate,
+  authorize([ROLES.MANAGER]),
+  userController.adminChangeUserPassword,
+);
+
 /* ======================
    COMMON (Authenticated)
 ====================== */

@@ -22,6 +22,8 @@ export const userActivitiesToPersian = (action) => {
       return "تغییر رمز عبور";
     case "UPDATE_PROFILE":
       return "بروزرسانی پروفایل";
+    case "CREATE_ADMIN":
+      return "ساخت ادمین";
     default:
       return action;
   }

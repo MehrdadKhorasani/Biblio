@@ -117,10 +117,9 @@ const toggleUserStatus = async (req, res) => {
 
 const getAllUsersForManager = async (req, res) => {
   try {
-    const users = await User.findAll();
-    res.status(200).json({
-      users,
-    });
+    const search = req.query.search || "";
+    const users = await User.findAllForManager(search); // 🔹 تابع جدید
+    res.status(200).json({ users });
   } catch (error) {
     console.error("Error fetching users for manager:", error);
     res.status(500).json({ message: "Server Error" });
@@ -386,6 +385,39 @@ const createAdmin = async (req, res) => {
   }
 };
 
+const adminChangeUserPassword = async (req, res) => {
+  try {
+    const adminId = req.user.id; // مدیر اصلی
+    const targetUserId = parseInt(req.params.id);
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 8) {
+      return res.status(400).json({
+        message: "رمز عبور باید حداقل ۸ کاراکتر باشد",
+      });
+    }
+
+    const user = await User.findById(targetUserId);
+    if (!user) {
+      return res.status(404).json({ message: "کاربر پیدا نشد" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await User.updatePassword(targetUserId, hashedPassword);
+
+    await UserActivityLog.create({
+      actorId: adminId,
+      targetUserId,
+      action: "ADMIN_CHANGE_PASSWORD",
+    });
+
+    return res.status(200).json({ message: "رمز عبور با موفقیت تغییر یافت" });
+  } catch (error) {
+    console.error("Error admin changing password:", error);
+    res.status(500).json({ message: "خطا در سرور، دوباره تلاش کنید" });
+  }
+};
+
 module.exports = {
   getAllUsersForAdmin,
   toggleUserStatus,
@@ -399,4 +431,5 @@ module.exports = {
   getUserActivityLogs,
   getAllAdminsForManager,
   createAdmin,
+  adminChangeUserPassword,
 };

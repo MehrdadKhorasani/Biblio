@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { fetchUserActivityReport } from "../../../api/report.api";
 import { userActivitiesToPersian } from "../../../utils/userActivitiesToPersian";
+import { toPersianNumber } from "../../../utils/toPersianNumbers";
 
 const formatToJalali = (dateString) => {
   if (!dateString) return "-";
@@ -128,7 +129,7 @@ export default function UserActivityReport() {
         >
           قبلی
         </button>
-        <span>صفحه {page}</span>
+        <span>صفحه {toPersianNumber(page)}</span>
         <button
           onClick={() => setPage((p) => p + 1)}
           className="px-3 py-1 border rounded"

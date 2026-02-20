@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { toPersianNumber } from "../../utils/toPersianNumbers";
 
 import {
   fetchBooks,
@@ -176,8 +177,8 @@ const AdminBooks = () => {
               <tr key={book.id} className={book.isDeleted ? "bg-red-100" : ""}>
                 <td className="border p-2">{book.title}</td>
                 <td className="border p-2">{book.author}</td>
-                <td className="border p-2">{book.price}</td>
-                <td className="border p-2">{book.stock}</td>
+                <td className="border p-2">{toPersianNumber(book.price)}</td>
+                <td className="border p-2">{toPersianNumber(book.stock)}</td>
                 <td className="border p-2">{book.isAvailable ? "✔️" : "❌"}</td>
                 <td className="border p-2 flex gap-1 flex-wrap">
                   {!book.isDeleted && (
@@ -236,7 +237,7 @@ const AdminBooks = () => {
           قبلی
         </button>
         <span>
-          صفحه {page} از {totalPages}
+          صفحه {toPersianNumber(page)} از {toPersianNumber(totalPages)}
         </span>
         <button
           onClick={handleNextPage}

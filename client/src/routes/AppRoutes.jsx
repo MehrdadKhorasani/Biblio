@@ -33,6 +33,7 @@ import UserActivityReport from "../pages/dashboard/manager/UserActivitiesReport"
 import SalesReport from "../pages/dashboard/manager/SalesReport";
 import ManageAdmins from "../pages/dashboard/manager/ManageAdmins";
 import CreateAdmin from "../pages/dashboard/manager/CreateAdmin";
+import AdminChangeUserPassword from "../pages/dashboard/manager/AdminChangeUserPassword";
 
 const AppRoutes = () => {
   return (
@@ -88,6 +89,10 @@ const AppRoutes = () => {
             element={<UserActivityReport />}
           />
           <Route path="manager/reports/sales" element={<SalesReport />} />
+          <Route
+            path="manager/change-password"
+            element={<AdminChangeUserPassword />}
+          />
         </Route>
       </Route>
 

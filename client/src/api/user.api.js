@@ -29,3 +29,27 @@ export const createAdmin = async (data) => {
   const res = await api.post("/users/manager/admins", data);
   return res.data.user;
 };
+
+// export const fetchManagerUsers = async (params = {}) => {
+//   const { search = "" } = params;
+//   const response = await api.get(
+//     `/manager/users?search=${encodeURIComponent(search)}`,
+//   );
+//   return response.data.users;
+// };
+
+// export const adminChangeUserPassword = async (userId, newPassword) => {
+//   await api.patch(`/manager/users/${userId}/password`, { newPassword });
+// };
+export const fetchManagerUsers = async (params = {}) => {
+  const { search = "" } = params;
+  const res = await api.get("/users/manager/users", { params: { search } });
+  return res.data.users;
+};
+
+export const adminChangeUserPassword = async (userId, newPassword) => {
+  const res = await api.patch(`/users/manager/users/${userId}/password`, {
+    newPassword,
+  });
+  return res.data;
+};

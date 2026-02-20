@@ -121,7 +121,7 @@ const BookStockReport = () => {
         </button>
 
         <span className="px-4 py-2">
-          صفحه {page} از {totalPages}
+          صفحه {toPersianNumber(page)} از {toPersianNumber(totalPages)}
         </span>
 
         <button
