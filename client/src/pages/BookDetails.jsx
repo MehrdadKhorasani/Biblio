@@ -25,7 +25,6 @@ const BookDetails = () => {
         const fetchedBook = response.data.book;
         setBook(fetchedBook);
 
-        // گرفتن کتاب‌های مرتبط
         const relatedResponse = await axios.get(
           `http://localhost:3000/api/books`,
           {
@@ -77,7 +76,7 @@ const BookDetails = () => {
             <p className="text-gray-600 mb-2">نویسنده: {book.author}</p>
 
             <p className="text-sm text-gray-500 mb-4">
-              دسته‌بندی: {book.categoryName || "نامشخص"}
+              دسته‌بندی: {book.category.name || "نامشخص"}
             </p>
 
             <div className="space-y-2 text-sm text-gray-700 mb-6">
