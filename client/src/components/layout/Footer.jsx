@@ -22,11 +22,6 @@ const Footer = () => {
                   محبوب‌ترین‌ها
                 </a>
               </li>
-              <li>
-                <a href="#" className="hover:text-white">
-                  تخفیف‌دار
-                </a>
-              </li>
             </ul>
           </div>
 
@@ -57,7 +52,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* ستون سوم: لینک‌های خارجی */}
           <div>
             <h3 className="text-lg font-bold text-white mb-4">لینک‌های مفید</h3>
             <ul className="space-y-2 text-sm">
@@ -89,6 +83,16 @@ const Footer = () => {
                   className="hover:text-white"
                 >
                   فیدیبو
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.taaghche.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-white"
+                >
+                  طاقچه
                 </a>
               </li>
             </ul>
