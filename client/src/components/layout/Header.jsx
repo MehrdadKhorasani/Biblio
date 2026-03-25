@@ -1,14 +1,31 @@
+import { useState } from "react";
 import { Search, ShoppingCart, User } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import { toPersianNumber } from "../../utils/toPersianNumbers";
 
 const Header = () => {
+  const [search, setSearch] = useState("");
   const { user } = useAuth();
   const { cartItems } = useCart();
+  const navigate = useNavigate();
+
+  const handleKeyDown = async (e) => {
+    if (e.code === "Enter") {
+      navigate(`/search?search=${search}`, { replace: true });
+    }
+  };
+
+  const searchHandler = (e) => {
+    const { value } = e.target;
+    setSearch(value);
+  };
 
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  console.log(search);
 
   return (
     <header className="w-full bg-white shadow-sm" dir="rtl">
@@ -17,10 +34,13 @@ const Header = () => {
           📚 بیبلیو
         </Link>
 
-        {/* وسط: سرچ */}
+        {/* Search Bar */}
         <div className="hidden md:flex items-center bg-gray-100 rounded-lg px-3 py-2 w-1/3">
           <Search size={18} className="text-gray-500 ml-2" />
           <input
+            onKeyDown={handleKeyDown}
+            onChange={searchHandler}
+            value={search}
             type="text"
             placeholder="جستجوی کتاب..."
             className="bg-transparent outline-none w-full text-sm"

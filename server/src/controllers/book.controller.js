@@ -62,7 +62,6 @@ const getBookById = async (req, res) => {
   try {
     const bookId = parseInt(req.params.id);
 
-    // تعیین اینکه آیا کاربر اجازه دیدن deleted دارد یا نه
     const includeDeleted =
       req.user &&
       (req.user.roleId === ROLES.ADMIN || req.user.roleId === ROLES.MANAGER);

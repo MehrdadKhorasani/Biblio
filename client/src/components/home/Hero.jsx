@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   return (
@@ -12,10 +13,9 @@ const Hero = () => {
         </h1>
 
         <p className="text-sm md:text-lg text-indigo-100 mb-8">
-          جستجو، مقایسه و خرید کتاب‌های مورد علاقه‌ات با چند کلیک ساده
+          جستجو و خرید کتاب‌های مورد علاقه‌ات با چند کلیک ساده
         </p>
 
-        {/* سرچ بزرگ */}
         <div className="max-w-xl mx-auto bg-white rounded-xl flex items-center px-4 py-3 shadow-lg">
           <Search className="text-gray-400 ml-2" />
           <input
@@ -25,12 +25,13 @@ const Hero = () => {
           />
         </div>
 
-        {/* CTA */}
         <div className="mt-6 flex justify-center gap-4">
-          <button className="bg-white text-indigo-600 px-6 py-2 rounded-lg font-medium hover:bg-gray-100">
+          <Link
+            to="/books"
+            className="bg-white text-indigo-600 px-6 py-2 rounded-lg font-medium hover:bg-gray-100"
+          >
             مشاهده کتاب‌ها
-          </button>
-
+          </Link>
           <button className="border border-white px-6 py-2 rounded-lg hover:bg-white hover:text-indigo-600 transition">
             دسته‌بندی‌ها
           </button>

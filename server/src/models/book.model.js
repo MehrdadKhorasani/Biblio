@@ -64,6 +64,15 @@ const Book = {
     }));
   },
 
+  // async findBySearch(searchItem) {
+  //   let trimmed = searchItem.trim();
+  //   const query = `
+  //     SELECT * FROM Book
+  //     WHERE title LIKE %${trimmed}%
+  //   `
+  //   return await db.query(query);
+  // },
+
   async findById(id, { includeDeleted = false } = {}) {
     let conditions = [`b.id = $1`];
     if (!includeDeleted) {
@@ -202,7 +211,12 @@ const Book = {
     }
 
     if (filters.search) {
-      conditions.push(`b.title ILIKE $${index++}`);
+      conditions.push(
+        `b.title ILIKE $${index++} OR b.author ILIKE $${index++} OR b.translator ILIKE $${index++} OR b.publisher ILIKE $${index++}`,
+      );
+      values.push(`%${filters.search}%`);
+      values.push(`%${filters.search}%`);
+      values.push(`%${filters.search}%`);
       values.push(`%${filters.search}%`);
     }
 

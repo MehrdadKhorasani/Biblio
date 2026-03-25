@@ -34,6 +34,8 @@ import SalesReport from "../pages/dashboard/manager/SalesReport";
 import ManageAdmins from "../pages/dashboard/manager/ManageAdmins";
 import CreateAdmin from "../pages/dashboard/manager/CreateAdmin";
 import AdminChangeUserPassword from "../pages/dashboard/manager/AdminChangeUserPassword";
+import BooksPage from "../pages/BooksPage";
+import SearchPage from "../pages/SearchPage";
 
 const AppRoutes = () => {
   return (
@@ -45,6 +47,8 @@ const AppRoutes = () => {
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/book/:id" element={<BookDetail />} />
       <Route path="/cart" element={<Cart />} />
+      <Route path="/books" element={<BooksPage />} />
+      <Route path="/search" element={<SearchPage />} />
 
       {/* Private base */}
       <Route element={<PrivateRoute />}>
