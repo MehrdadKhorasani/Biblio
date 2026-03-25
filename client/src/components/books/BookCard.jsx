@@ -11,9 +11,9 @@ const BookCard = ({ book }) => {
     <Link to={`/book/${book.id}`}>
       <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
         <img
-          src={book.image}
+          src={book.coverImage}
           alt={book.title}
-          className="w-full h-60 object-cover"
+          className="w-full h-60 object-contain"
         />
 
         <div className="p-4 text-right">
