@@ -1,3 +1,6 @@
+import { Link } from "react-router-dom";
+import AboutUs from "../../pages/Footer/AboutUs";
+
 const Footer = () => {
   return (
     <footer className="bg-gray-900 text-gray-300 mt-16" dir="rtl">
@@ -30,24 +33,24 @@ const Footer = () => {
             <h3 className="text-lg font-bold text-white mb-4">درباره سایت</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="#" className="hover:text-white">
+                <Link to="/AboutUs" className="hover:text-white">
                   درباره ما
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white">
+                <Link to="/ContactUs" className="hover:text-white">
                   تماس با ما
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white">
+                <Link to="/faq" className="hover:text-white">
                   سوالات متداول
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white">
+                <Link to="/policies" className="hover:text-white">
                   قوانین و مقررات
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

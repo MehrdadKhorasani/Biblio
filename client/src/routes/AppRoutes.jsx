@@ -37,6 +37,10 @@ import AdminChangeUserPassword from "../pages/dashboard/manager/AdminChangeUserP
 import BooksPage from "../pages/BooksPage";
 import CategoriesPage from "../pages/CategoriesPage";
 import SearchPage from "../pages/SearchPage";
+import AboutUs from "../pages/Footer/AboutUs";
+import ContactUs from "../pages/Footer/ContactUs";
+import FAQ from "../pages/Footer/FAQ";
+import Policies from "../pages/Footer/Policies";
 
 const AppRoutes = () => {
   return (
@@ -51,6 +55,10 @@ const AppRoutes = () => {
       <Route path="/books" element={<BooksPage />} />
       <Route path="/categories" element={<CategoriesPage />} />
       <Route path="/search" element={<SearchPage />} />
+      <Route path="/aboutus" element={<AboutUs />} />
+      <Route path="/contactus" element={<ContactUs />} />
+      <Route path="/faq" element={<FAQ />} />
+      <Route path="/policies" element={<Policies />} />
 
       {/* Private base */}
       <Route element={<PrivateRoute />}>
