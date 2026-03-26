@@ -22,10 +22,9 @@ const EditBook = () => {
           fetchCategories(),
           fetchBookById(numericId),
         ]);
-        console.log("Categories response:", categoriesRes);
 
         setCategories(categoriesRes.categories || []);
-        setBook(bookRes.book || bookRes); // اگر ساختار متفاوت بود اینو تنظیم می‌کنیم
+        setBook(bookRes.book || bookRes);
       } catch (err) {
         console.error("Error loading edit data:", err);
       } finally {

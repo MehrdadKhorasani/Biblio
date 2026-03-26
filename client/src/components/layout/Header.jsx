@@ -25,8 +25,6 @@ const Header = () => {
 
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  console.log(search);
-
   return (
     <header className="w-full bg-white shadow-sm" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">

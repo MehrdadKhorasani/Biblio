@@ -1,7 +1,22 @@
 import { Search } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Hero = () => {
+  const [search, setSearch] = useState("");
+  const navigate = useNavigate();
+  const handleKeyDown = async (e) => {
+    if (e.code === "Enter") {
+      navigate(`/search?search=${search}`, { replace: true });
+    }
+  };
+
+  const searchHandler = (e) => {
+    const { value } = e.target;
+    setSearch(value);
+  };
+
   return (
     <section
       className="w-full bg-gradient-to-l from-indigo-600 to-purple-600 text-white"
@@ -19,6 +34,9 @@ const Hero = () => {
         <div className="max-w-xl mx-auto bg-white rounded-xl flex items-center px-4 py-3 shadow-lg">
           <Search className="text-gray-400 ml-2" />
           <input
+            onKeyDown={handleKeyDown}
+            onChange={searchHandler}
+            value={search}
             type="text"
             placeholder="نام کتاب، نویسنده یا دسته‌بندی..."
             className="w-full outline-none text-gray-700 text-sm md:text-base"
@@ -32,9 +50,12 @@ const Hero = () => {
           >
             مشاهده کتاب‌ها
           </Link>
-          <button className="border border-white px-6 py-2 rounded-lg hover:bg-white hover:text-indigo-600 transition">
+          <Link
+            to="/categories"
+            className="border border-white px-6 py-2 rounded-lg hover:bg-white hover:text-indigo-600 transition"
+          >
             دسته‌بندی‌ها
-          </button>
+          </Link>
         </div>
       </div>
     </section>

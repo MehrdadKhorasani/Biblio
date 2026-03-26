@@ -35,6 +35,7 @@ import ManageAdmins from "../pages/dashboard/manager/ManageAdmins";
 import CreateAdmin from "../pages/dashboard/manager/CreateAdmin";
 import AdminChangeUserPassword from "../pages/dashboard/manager/AdminChangeUserPassword";
 import BooksPage from "../pages/BooksPage";
+import CategoriesPage from "../pages/CategoriesPage";
 import SearchPage from "../pages/SearchPage";
 
 const AppRoutes = () => {
@@ -48,6 +49,7 @@ const AppRoutes = () => {
       <Route path="/book/:id" element={<BookDetail />} />
       <Route path="/cart" element={<Cart />} />
       <Route path="/books" element={<BooksPage />} />
+      <Route path="/categories" element={<CategoriesPage />} />
       <Route path="/search" element={<SearchPage />} />
 
       {/* Private base */}
