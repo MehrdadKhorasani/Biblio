@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { registerUser } from "../../api/auth.api";
 import Header from "../../components/layout/Header";
+import Footer from "../../components/layout/Footer";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -109,6 +110,7 @@ const Register = () => {
           </p>
         </div>
       </div>
+      <Footer />
     </>
   );
 };

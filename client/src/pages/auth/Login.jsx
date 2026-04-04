@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Header from "../../components/layout/Header";
+import Footer from "../../components/layout/Footer";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -77,6 +78,7 @@ const Login = () => {
           </p>
         </form>
       </div>
+      <Footer />
     </>
   );
 };

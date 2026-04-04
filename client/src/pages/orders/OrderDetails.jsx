@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "../../api/axios";
+import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
 import { toPersianNumber } from "../../utils/toPersianNumbers";
 import { orderStatusToPersian } from "../../utils/orderStatusToPersian";
@@ -16,7 +16,7 @@ const OrderDetails = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const res = await axios.get(`/orders/${id}`);
+        const res = await api.get(`/orders/${id}`);
         setOrder(res.data.order);
       } catch (err) {
         console.error(err);
@@ -33,9 +33,9 @@ const OrderDetails = () => {
 
     try {
       setPaying(true);
-      await axios.post(`/orders/${order.id}/pay`);
-      const res = await axios.get(`/orders/${order.id}`);
-      setOrder(res.data.order); // آپدیت وضعیت سفارش
+      await api.post(`/orders/${order.id}/pay`);
+      const res = await api.get(`/orders/${order.id}`);
+      setOrder(res.data.order);
       alert("پرداخت با موفقیت انجام شد!");
     } catch (err) {
       console.error("Payment error:", err);
@@ -73,8 +73,8 @@ const OrderDetails = () => {
 
         <p>نام شهر: {order.city}</p>
         <p>آدرس: {order.address}</p>
-        <p>تلفن: {order.phone}</p>
-        <p>کد پستی: {order.postalCode}</p>
+        <p>تلفن: {toPersianNumber(order.phone)}</p>
+        <p>کد پستی: {toPersianNumber(order.postalCode)}</p>
         <p>
           جمع کل:
           <span className="mr-2 font-bold">
@@ -105,12 +105,12 @@ const OrderDetails = () => {
             {order.items && order.items.length > 0 ? (
               order.items.map((item) => (
                 <div
-                  key={item.bookId}
+                  key={item.id}
                   className="flex justify-between border-b pb-4 items-center"
                 >
                   <div className="flex gap-4 items-center">
                     <img
-                      src={item.image}
+                      src={item.coverImage}
                       alt={item.title}
                       className="w-16 h-20 object-cover rounded"
                     />

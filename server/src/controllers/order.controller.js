@@ -336,7 +336,6 @@ const getAdminOrders = async (req, res) => {
       );
     }
 
-    // کوئری اصلی
     let query = `
       SELECT 
         o.*,
@@ -363,7 +362,6 @@ const getAdminOrders = async (req, res) => {
 
     const result = await db.query(query, values);
 
-    // Map کردن سفارش‌ها با آیتم‌ها
     const ordersMap = {};
     for (const row of result.rows) {
       if (!ordersMap[row.id]) {

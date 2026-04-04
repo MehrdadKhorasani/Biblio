@@ -24,9 +24,7 @@ export default function SearchPage() {
     <div>
       <Header />
       <section className="py-10 mx-28" dir="rtl">
-        <h2 className="text-3xl font-bold mt-4 mb-8 text-right">
-          لیست کتاب‌ها
-        </h2>
+        <h2 className="text-3xl font-bold mt-4 mb-8 text-right">نتیجه جستجو</h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
           {books.map((book) => (
