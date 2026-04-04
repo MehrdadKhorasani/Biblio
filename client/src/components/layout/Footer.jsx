@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import AboutUs from "../../pages/Footer/AboutUs";
 
 const Footer = () => {
   return (
@@ -11,19 +10,19 @@ const Footer = () => {
             <h3 className="text-lg font-bold text-white mb-4">کتاب‌ها</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="#" className="hover:text-white">
-                  پرفروش‌ترین‌ها
-                </a>
+                <Link to="/login" className="hover:text-white">
+                  ورود به پنل کاربری
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white">
-                  جدیدترین کتاب‌ها
-                </a>
+                <Link to="/" className="hover:text-white">
+                  صفحه اصلی سایت
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white">
-                  محبوب‌ترین‌ها
-                </a>
+                <Link to="/Books" className="hover:text-white">
+                  لیست کتاب‌ها
+                </Link>
               </li>
             </ul>
           </div>

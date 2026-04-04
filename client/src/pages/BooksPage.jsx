@@ -3,26 +3,50 @@ import axios from "axios";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import BookList from "../components/books/BookList";
+import { toPersianNumber } from "../utils/toPersianNumbers";
+
+const ITEMS_PER_PAGE = 8;
 
 export default function BooksPage() {
+  const [currentPage, setCurrentPage] = useState(1);
   const [books, setBooks] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/books");
+        const response = await axios.get("http://localhost:3000/api/books", {
+          params: {
+            page: currentPage,
+            limit: ITEMS_PER_PAGE,
+          },
+        });
         setBooks(response.data.books);
+        setTotalPages(response.data.pagination.totalPages);
       } catch (error) {
         console.error("Error fetching books:", error);
       }
     };
 
     fetchBooks();
-  }, []);
-
+  }, [currentPage]);
   return (
     <div>
       <Header />
+
       <BookList books={books} />
+      <div className="flex justify-center mt-8 gap-2" dir="rtl">
+        {Array.from({ length: totalPages }).map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentPage(index + 1)}
+            className={`px-3 py-1 rounded border ${
+              currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-white"
+            }`}
+          >
+            {toPersianNumber(index + 1)}
+          </button>
+        ))}
+      </div>
       <Footer />
     </div>
   );
