@@ -11,7 +11,6 @@ const CategorySection = ({ selectedCategory, setSelectedCategory }) => {
           "http://localhost:3000/api/categories",
         );
 
-        // فقط دسته‌بندی‌های فعال
         const activeCategories = response.data.categories.filter(
           (cat) => cat.isActive,
         );
